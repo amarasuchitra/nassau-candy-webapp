@@ -18,10 +18,11 @@ if ROOT not in sys.path:
 import pandas as pd  # noqa: E402
 import plotly.graph_objects as go  # noqa: E402
 import streamlit as st  # noqa: E402
+import streamlit.components.v1 as components  # noqa: E402
 
 from backend.services import AppState  # noqa: E402  (also puts src/ on the path)
 from constants import (  # type: ignore  # noqa: E402
-    FACTORY_COORDS, MAP_BOUNDS, NET_FACTORY_POS, NET_REGION_POS, REGION_COORDS,
+    FACTORY_COORDS, NET_FACTORY_POS, NET_REGION_POS, REGION_COORDS,
 )
 
 st.set_page_config(page_title="Nassau Candy · Factory Allocation", layout="wide",
@@ -151,6 +152,28 @@ h1,h2,h3{{font-family:{FONT} !important; letter-spacing:-.01em; font-weight:600 
 .risk p{{color:var(--ink-2);}}
 .foot{{border-top:1px solid var(--line); margin-top:36px; padding-top:16px; font-size:12.5px; color:var(--ink-3);}}
 
+
+/* ---- polish: depth, warmth, hierarchy ---- */
+.stApp{{background:linear-gradient(180deg,#F7F3EC 0,#FBFAF7 340px,#FBFAF7 100%);}}
+.nc-bar .name{{font-size:16px; letter-spacing:.01em;}}
+.nc-bar .name::before{{content:""; display:inline-block; width:10px; height:10px; border-radius:2px; background:var(--accent); margin-right:9px; transform:rotate(45deg);}}
+.ov h1{{font-size:34px; line-height:1.15; letter-spacing:-.02em;}}
+.ov .dek{{font-size:15.5px;}}
+.kpis-top{{border-top:0; display:grid; gap:10px;}}
+.kpi{{background:#fff; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:8px; padding:14px 16px; box-shadow:0 1px 2px rgba(28,27,25,.04);}}
+.kpi .v{{font-size:28px; color:var(--accent); font-variant-numeric:tabular-nums;}}
+.panel, .decision, .cmp, .opps, .risk{{background:#fff; box-shadow:0 1px 2px rgba(28,27,25,.04),0 8px 24px -12px rgba(28,27,25,.12); border-radius:10px;}}
+[data-testid="stVerticalBlockBorderWrapper"]{{background:#fff; border-radius:10px !important; box-shadow:0 1px 2px rgba(28,27,25,.04),0 8px 24px -14px rgba(28,27,25,.14);}}
+.decision .main{{background:linear-gradient(160deg,#F6EFE3 0,#FBF6EE 100%);}}
+.dec-days{{font-size:48px; color:var(--ink);}}
+.stTabs [data-baseweb="tab-list"]{{background:#fff; border:1px solid var(--line); border-radius:10px; padding:4px; gap:2px; box-shadow:0 1px 2px rgba(28,27,25,.04);}}
+.stTabs [data-baseweb="tab"]{{border-radius:7px; padding:9px 18px; font-weight:500;}}
+.stTabs [aria-selected="true"]{{background:var(--accent-tint); color:var(--accent);}}
+.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"]{{display:none;}}
+.sh h2{{font-size:26px; letter-spacing:-.015em;}}
+.opp .big{{font-size:26px;}}
+.stDownloadButton button{{border-radius:8px; border-color:var(--line-strong);}}
+
 @media (max-width:820px){{
   .decision, .opps, .risk{{grid-template-columns:1fr;}}
   .decision .main{{border-right:0; border-bottom:1px solid var(--line);}}
@@ -232,51 +255,142 @@ def network_svg():
     return "".join(out)
 
 
-# --------------------------------------------------------------- route svg
-def project(lat, lon):
-    b = MAP_BOUNDS
-    x = b["pad_x"] + (lon - b["west"]) / (b["east"] - b["west"]) * (b["width"] - 2 * b["pad_x"])
-    y = b["pad_y"] + (b["north"] - lat) / (b["north"] - b["south"]) * (b["height"] - 2 * b["pad_y"])
-    return x, y
+# ------------------------------------------------------- shipment simulation map
+def _gc_path(a, b, n=48):
+    """Great-circle points from a to b (lat, lon), inclusive."""
+    la1, lo1, la2, lo2 = map(math.radians, (a[0], a[1], b[0], b[1]))
+    v1 = (math.cos(la1) * math.cos(lo1), math.cos(la1) * math.sin(lo1), math.sin(la1))
+    v2 = (math.cos(la2) * math.cos(lo2), math.cos(la2) * math.sin(lo2), math.sin(la2))
+    om = math.acos(max(-1.0, min(1.0, sum(x * y for x, y in zip(v1, v2))))) or 1e-9
+    pts = []
+    for i in range(n + 1):
+        t = i / n
+        s1, s2 = math.sin((1 - t) * om) / math.sin(om), math.sin(t * om) / math.sin(om)
+        x, y, z = (s1 * p + s2 * q for p, q in zip(v1, v2))
+        pts.append((math.degrees(math.atan2(z, math.hypot(x, y))), math.degrees(math.atan2(y, x))))
+    return pts
 
 
-def route_svg(cur, best, region):
-    same = cur["factory"] == best["factory"]
-    rx, ry = project(*REGION_COORDS[region])
+def _partial(path, f):
+    """The first fraction f of a path, ending exactly at the interpolated point."""
+    if f <= 0:
+        return [path[0]]
+    k = f * (len(path) - 1)
+    i = int(k)
+    if i >= len(path) - 1:
+        return list(path)
+    t = k - i
+    (a1, o1), (a2, o2) = path[i], path[i + 1]
+    return path[: i + 1] + [(a1 + (a2 - a1) * t, o1 + (o2 - o1) * t)]
 
-    def curve(fx, fy, side):
-        dx, dy = rx - fx, ry - fy
-        ln = (dx * dx + dy * dy) ** 0.5 or 1
-        bow = min(40, ln * 0.14) * side
-        return f"M{fx:.1f},{fy:.1f} Q{(fx+rx)/2 - dy/ln*bow:.1f},{(fy+ry)/2 + dx/ln*bow:.1f} {rx:.1f},{ry:.1f}"
 
-    def node(x, y, name, tag, color):
-        below = ry < y
-        y1, y2 = (y + 24, y + 39) if below else (y - 30, y - 15)
-        return (f'<circle cx="{x:.1f}" cy="{y:.1f}" r="8" fill="{FACTORY_COLORS.get(name, ACCENT)}" stroke="#fff" stroke-width="2"/>'
-                f'<text x="{x:.1f}" y="{y1:.1f}" text-anchor="middle" font-size="12.5" font-weight="700" fill="{INK}" stroke="#FAFAF8" stroke-width="4" paint-order="stroke">{name}</text>'
-                f'<text x="{x:.1f}" y="{y2:.1f}" text-anchor="middle" font-size="11" font-weight="600" fill="{color}" stroke="#FAFAF8" stroke-width="4" paint-order="stroke">{tag}</text>')
+def simulation_map_html(rows, region, cur_factory):
+    """Real US map. Every factory dispatches at day 0 and each shipment travels at its
+    predicted lead time, so arrival order is the ranking. Replays on every change."""
+    dest = tuple(REGION_COORDS[region])
+    best = rows[0]["factory"]
+    shortest = min(rows, key=lambda r: r["distance_miles"])["factory"]
+    paths = {r["factory"]: _gc_path(FACTORY_COORDS[r["factory"]], dest) for r in rows}
+    lead = {r["factory"]: max(r["lead_time_days"], 0.01) for r in rows}
+    t_end = max(lead.values()) * 1.04
+    n_frames = 44
+    days = [t_end * i / n_frames for i in range(n_frames + 1)]
 
-    out = [f'<svg viewBox="0 0 860 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;background:#FAFAF8;border-radius:4px">',
-           '<rect x="0.5" y="0.5" width="859" height="379" rx="4" fill="none" stroke="#E6E4DE"/>']
-    for name, (lat, lon) in FACTORY_COORDS.items():
-        if name in (cur["factory"], best["factory"]):
-            continue
-        x, y = project(lat, lon)
-        out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="#C9C6BE"/><text x="{x:.1f}" y="{y-9:.1f}" text-anchor="middle" font-size="11" fill="{INK3}">{name}</text>')
-    cx, cy = project(*FACTORY_COORDS[cur["factory"]])
-    bx, by = project(*FACTORY_COORDS[best["factory"]])
-    if not same:
-        out.append(f'<path d="{curve(cx, cy, 1)}" fill="none" stroke="{INK2}" stroke-width="2" stroke-dasharray="6 5" stroke-linecap="round"/>')
-    out.append(f'<path d="{curve(bx, by, -1)}" fill="none" stroke="{ACCENT}" stroke-width="3" stroke-linecap="round"/>')
-    if same:
-        out.append(node(bx, by, best["factory"], "Current and recommended", ACCENT))
-    else:
-        out.append(node(cx, cy, cur["factory"], "Current", INK2))
-        out.append(node(bx, by, best["factory"], "Recommended", ACCENT))
-    out.append(f'<rect x="{rx-6:.1f}" y="{ry-6:.1f}" width="12" height="12" fill="{INK}" stroke="#fff" stroke-width="2"/>'
-               f'<text x="{rx:.1f}" y="{ry-14:.1f}" text-anchor="middle" font-size="12.5" font-weight="700" fill="{INK}" stroke="#FAFAF8" stroke-width="4" paint-order="stroke">{region} region</text></svg>')
-    return "".join(out)
+    fig = go.Figure()
+    # 1) full routes, faint: what could ship from where
+    for r in rows:
+        f = r["factory"]
+        la, lo = zip(*paths[f])
+        fig.add_trace(go.Scattergeo(lat=la, lon=lo, mode="lines", hoverinfo="skip", showlegend=False,
+                                    line=dict(width=1.3, color="#BDB9AF", dash="dot")))
+    # 2) current route, dashed, so the move is visible
+    if cur_factory != best:
+        la, lo = zip(*paths[cur_factory])
+        fig.add_trace(go.Scattergeo(lat=la, lon=lo, mode="lines", hoverinfo="skip", showlegend=False,
+                                    line=dict(width=2.2, color=INK2, dash="dash")))
+    # 3) factories + destination
+    labels, hovers = [], []
+    for i, r in enumerate(rows):
+        tag = []
+        if r["factory"] == best:
+            tag.append("fastest")
+        if r["factory"] == shortest:
+            tag.append("shortest")
+        if r["is_current"]:
+            tag.append("current")
+        labels.append(f"<b>{i+1}. {r['factory']}</b>" + (f" · {', '.join(tag)}" if tag else ""))
+        hovers.append(f"<b>{r['factory']}</b><br>{r['distance_miles']:,.0f} mi · {r['lead_time_days']:.2f} days"
+                      f"<br>${r['ship_cost_per_order']:.2f} / order")
+    fig.add_trace(go.Scattergeo(
+        lat=[FACTORY_COORDS[r["factory"]][0] for r in rows], lon=[FACTORY_COORDS[r["factory"]][1] for r in rows],
+        mode="markers+text", text=labels, textposition="top center", showlegend=False,
+        textfont=dict(size=11, color=INK), hovertext=hovers, hoverinfo="text",
+        marker=dict(size=[13 if r["factory"] == best else 10 for r in rows],
+                    color=[FACTORY_COLORS[r["factory"]] for r in rows], line=dict(color="white", width=2))))
+    fig.add_trace(go.Scattergeo(lat=[dest[0]], lon=[dest[1]], mode="markers+text", text=[f"<b>{region} region</b>"],
+                                textposition="bottom center", textfont=dict(size=12, color=INK), showlegend=False,
+                                hoverinfo="text", hovertext=[f"Destination: {region} region"],
+                                marker=dict(symbol="square", size=12, color=INK, line=dict(color="white", width=2))))
+    n_static = len(fig.data)
+
+    def moving(day):
+        """Travelled part of each route + the shipment marker, at a given day."""
+        out = []
+        for r in rows:
+            f = r["factory"]
+            done = min(1.0, day / lead[f])
+            seg = _partial(paths[f], done)
+            la, lo = zip(*seg)
+            win = f == best
+            out.append(go.Scattergeo(lat=la, lon=lo, mode="lines", hoverinfo="skip", showlegend=False,
+                                     line=dict(width=4.5 if win else 2.2,
+                                               color=ACCENT if (win and done >= 1) else FACTORY_COLORS[f])))
+        pos = [_partial(paths[r["factory"]], min(1.0, day / lead[r["factory"]]))[-1] for r in rows]
+        out.append(go.Scattergeo(
+            lat=[p[0] for p in pos], lon=[p[1] for p in pos], mode="markers", showlegend=False, hoverinfo="skip",
+            marker=dict(size=9, symbol="circle", color=[FACTORY_COLORS[r["factory"]] for r in rows],
+                        line=dict(color=INK, width=1.2))))
+        return out
+
+    def status(day):
+        arrived = [r for r in rows if lead[r["factory"]] <= day]
+        if not arrived:
+            txt = f"Day {day:.1f} · all five factories dispatched, shipments in transit"
+        elif len(arrived) < len(rows):
+            txt = (f"Day {day:.1f} · <b>{arrived[0]['factory']}</b> arrived first ({arrived[0]['lead_time_days']:.1f} d)"
+                   f" · {len(arrived)} of {len(rows)} delivered")
+        else:
+            txt = (f"Day {day:.1f} · all delivered · fastest: <b>{best}</b> ({rows[0]['lead_time_days']:.1f} d)"
+                   f" · shortest distance: <b>{shortest}</b>")
+        return [dict(text=txt, x=0.01, y=0.99, xref="paper", yref="paper", xanchor="left", yanchor="top",
+                     showarrow=False, align="left", font=dict(size=12.5, color=INK),
+                     bgcolor="rgba(255,255,255,.92)", bordercolor=LINE, borderwidth=1, borderpad=6)]
+
+    for tr in moving(0):
+        fig.add_trace(tr)
+    anim_idx = list(range(n_static, len(fig.data)))
+    fig.frames = [go.Frame(name=f"{d:.2f}", data=moving(d), traces=anim_idx, layout=dict(annotations=status(d)))
+                  for d in days]
+
+    play = dict(frame=dict(duration=70, redraw=True), transition=dict(duration=0), fromcurrent=False, mode="immediate")
+    fig.update_layout(
+        height=430, margin=dict(l=0, r=0, t=0, b=0), paper_bgcolor="white", font=dict(family=FONT, color=INK2),
+        annotations=status(0), hoverlabel=dict(font_family=FONT, bgcolor="white"),
+        geo=dict(scope="usa", projection_type="albers usa", showland=True, landcolor="#F3F2EE",
+                 subunitcolor="#D9D6CE", countrycolor="#CFCCC4", showlakes=False, bgcolor="white"),
+        updatemenus=[dict(type="buttons", direction="left", x=0.01, y=0.02, xanchor="left", yanchor="bottom",
+                          pad=dict(r=6, t=0), bgcolor="white", bordercolor="#CFCCC4", font=dict(size=12, color=INK),
+                          showactive=False,
+                          buttons=[dict(label="Replay simulation", method="animate", args=[None, play])])],
+        sliders=[dict(active=0, x=0.22, len=0.76, y=0.02, yanchor="bottom", pad=dict(t=0, b=0),
+                      currentvalue=dict(visible=False), ticklen=0, font=dict(size=1, color="white"),
+                      bgcolor="#E6E4DE", activebgcolor=ACCENT, bordercolor="#CFCCC4",
+                      steps=[dict(label="", method="animate",
+                                  args=[[f"{d:.2f}"], dict(frame=dict(duration=0, redraw=True), mode="immediate")])
+                             for d in days])])
+    return fig.to_html(include_plotlyjs="cdn", full_html=True, auto_play=True, animation_opts=play,
+                       config={"displayModeBar": False, "scrollZoom": False},
+                       default_height="430px", default_width="100%")
 
 
 # ============================================================== header + overview
@@ -381,13 +495,14 @@ with tab_sim:
             html('<div class="card-h">Factories ranked</div><div class="card-sub">Fastest first</div>' + "".join(lb))
 
     with st.container(border=True):
-        route_title = "Current route and recommended route" if not same else f"{best['factory']} → {region}: already the best route"
-        html(f'<div class="card-h">{route_title}</div><div class="card-sub">{product} → {region} · {ship}</div>')
+        route_title = "Shipment simulation: current route and recommended route" if not same else f"Shipment simulation: {best['factory']} is already the best route"
+        html(f'<div class="card-h">{route_title}</div><div class="card-sub">{product} → {region} · {ship} · every factory dispatches on day 0 and travels at its predicted lead time; the first to arrive is recommended</div>')
         m, c = st.columns([8, 4], gap="medium")
         with m:
-            html(route_svg(cur, best, region))
-            html(f'<div class="legend" style="margin-top:8px"><span><i style="width:18px;height:0;border-top:2px dashed {INK2};border-radius:0"></i>Current route</span>'
-                 f'<span><i style="width:18px;height:0;border-top:3px solid {ACCENT};border-radius:0"></i>Recommended route</span></div>')
+            components.html(simulation_map_html(rows, region, cur["factory"]), height=440)
+            html(f'<div class="legend" style="margin-top:4px"><span><i style="width:18px;height:0;border-top:2px dashed {INK2};border-radius:0"></i>Current route</span>'
+                 f'<span><i style="width:18px;height:0;border-top:4px solid {ACCENT};border-radius:0"></i>Fastest route, once delivered</span>'
+                 f'<span><i style="width:18px;height:0;border-top:2px dotted #BDB9AF;border-radius:0"></i>Other factories</span></div>')
         with c:
             d_days, d_miles, d_cost = saved, cur["distance_miles"] - best["distance_miles"], cur["ship_cost_per_order"] - best["ship_cost_per_order"]
             miles_txt = f"{whole(d_miles)} mi" if d_miles >= 0 else f'{whole(-d_miles)} mi <span class="u">longer</span>'
