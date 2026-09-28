@@ -1,0 +1,11 @@
+.git
+.github
+.venv
+**/__pycache__
+**/*.pyc
+tests
+streamlit_app
+*.md
+!README.md
+start_dashboard.bat
+start.sh

@@ -1,0 +1,266 @@
+Product Name,Region,current_factory,candidate_factory,orders,distance_miles,pred_lead_time_days,est_shipping_cost_per_order
+Everlasting Gobstopper,Gulf,Secret Factory,Lot's O' Nuts,1,1822.1,7.94,7.288
+Everlasting Gobstopper,Gulf,Secret Factory,Wicked Choccy's,1,299.9,4.89,1.2
+Everlasting Gobstopper,Gulf,Secret Factory,Sugar Shack,1,1606.7,7.4,6.427
+Everlasting Gobstopper,Gulf,Secret Factory,Secret Factory,1,1070.2,6.4,4.281
+Everlasting Gobstopper,Gulf,Secret Factory,The Other Factory,1,704.0,5.72,2.816
+Everlasting Gobstopper,Interior,Secret Factory,Lot's O' Nuts,1,841.5,5.98,2.524
+Everlasting Gobstopper,Interior,Secret Factory,Wicked Choccy's,1,971.5,6.25,2.915
+Everlasting Gobstopper,Interior,Secret Factory,Sugar Shack,1,1181.3,6.56,3.544
+Everlasting Gobstopper,Interior,Secret Factory,Secret Factory,1,816.4,5.9,2.449
+Everlasting Gobstopper,Interior,Secret Factory,The Other Factory,1,521.3,5.37,1.564
+Everlasting Gobstopper,Pacific,Secret Factory,Lot's O' Nuts,1,558.7,2.9,3.352
+Everlasting Gobstopper,Pacific,Secret Factory,Wicked Choccy's,1,1439.1,4.67,8.634
+Everlasting Gobstopper,Pacific,Secret Factory,Sugar Shack,1,773.8,3.23,4.643
+Everlasting Gobstopper,Pacific,Secret Factory,Secret Factory,1,793.8,3.34,4.763
+Everlasting Gobstopper,Pacific,Secret Factory,The Other Factory,1,887.0,3.58,5.322
+Fizzy Lifting Drinks,Atlantic,Sugar Shack,Lot's O' Nuts,2,2028.6,6.06,9.129
+Fizzy Lifting Drinks,Atlantic,Sugar Shack,Wicked Choccy's,2,691.5,3.39,3.112
+Fizzy Lifting Drinks,Atlantic,Sugar Shack,Sugar Shack,2,1084.3,4.07,4.879
+Fizzy Lifting Drinks,Atlantic,Sugar Shack,Secret Factory,2,743.9,3.45,3.347
+Fizzy Lifting Drinks,Atlantic,Sugar Shack,The Other Factory,2,859.1,3.74,3.866
+Fizzy Lifting Drinks,Gulf,Sugar Shack,Lot's O' Nuts,1,1822.1,8.15,7.288
+Fizzy Lifting Drinks,Gulf,Sugar Shack,Wicked Choccy's,1,299.9,5.1,1.2
+Fizzy Lifting Drinks,Gulf,Sugar Shack,Sugar Shack,1,1606.7,7.61,6.427
+Fizzy Lifting Drinks,Gulf,Sugar Shack,Secret Factory,1,1070.2,6.61,4.281
+Fizzy Lifting Drinks,Gulf,Sugar Shack,The Other Factory,1,704.0,5.93,2.816
+Fizzy Lifting Drinks,Interior,Sugar Shack,Lot's O' Nuts,2,1526.8,5.06,3.817
+Fizzy Lifting Drinks,Interior,Sugar Shack,Wicked Choccy's,2,752.0,3.51,1.88
+Fizzy Lifting Drinks,Interior,Sugar Shack,Sugar Shack,2,633.3,3.17,1.583
+Fizzy Lifting Drinks,Interior,Sugar Shack,Secret Factory,2,224.0,2.42,0.56
+Fizzy Lifting Drinks,Interior,Sugar Shack,The Other Factory,2,523.4,3.08,1.308
+Fizzy Lifting Drinks,Pacific,Sugar Shack,Lot's O' Nuts,1,61.7,4.62,0.185
+Fizzy Lifting Drinks,Pacific,Sugar Shack,Wicked Choccy's,1,1757.6,8.02,5.273
+Fizzy Lifting Drinks,Pacific,Sugar Shack,Sugar Shack,1,1268.8,6.93,3.806
+Fizzy Lifting Drinks,Pacific,Sugar Shack,Secret Factory,1,1256.4,6.98,3.769
+Fizzy Lifting Drinks,Pacific,Sugar Shack,The Other Factory,1,1224.5,6.97,3.673
+Fun Dip,Atlantic,Sugar Shack,Lot's O' Nuts,1,2098.7,8.36,8.395
+Fun Dip,Atlantic,Sugar Shack,Wicked Choccy's,1,774.3,5.71,3.097
+Fun Dip,Atlantic,Sugar Shack,Sugar Shack,1,1109.0,6.27,4.436
+Fun Dip,Atlantic,Sugar Shack,Secret Factory,1,804.8,5.73,3.219
+Fun Dip,Atlantic,Sugar Shack,The Other Factory,1,943.7,6.07,3.775
+Fun Dip,Gulf,Sugar Shack,Lot's O' Nuts,1,1440.7,5.53,1.441
+Fun Dip,Gulf,Sugar Shack,Wicked Choccy's,1,409.3,3.47,0.409
+Fun Dip,Gulf,Sugar Shack,Sugar Shack,1,982.4,4.51,0.982
+Fun Dip,Gulf,Sugar Shack,Secret Factory,1,445.7,3.51,0.446
+Fun Dip,Gulf,Sugar Shack,The Other Factory,1,189.6,3.05,0.19
+Fun Dip,Interior,Sugar Shack,Lot's O' Nuts,1,1359.8,5.38,4.079
+Fun Dip,Interior,Sugar Shack,Wicked Choccy's,1,720.8,4.1,2.163
+Fun Dip,Interior,Sugar Shack,Sugar Shack,1,643.6,3.84,1.931
+Fun Dip,Interior,Sugar Shack,Secret Factory,1,112.0,2.85,0.336
+Fun Dip,Interior,Sugar Shack,The Other Factory,1,365.5,3.41,1.096
+Hair Toffee,Atlantic,The Other Factory,Lot's O' Nuts,1,2098.7,8.6,10.494
+Hair Toffee,Atlantic,The Other Factory,Wicked Choccy's,1,774.3,5.95,3.872
+Hair Toffee,Atlantic,The Other Factory,Sugar Shack,1,1109.0,6.52,5.545
+Hair Toffee,Atlantic,The Other Factory,Secret Factory,1,804.8,5.98,4.024
+Hair Toffee,Atlantic,The Other Factory,The Other Factory,1,943.7,6.31,4.719
+Hair Toffee,Gulf,The Other Factory,Lot's O' Nuts,1,1827.1,4.55,3.654
+Hair Toffee,Gulf,The Other Factory,Wicked Choccy's,1,256.3,1.41,0.513
+Hair Toffee,Gulf,The Other Factory,Sugar Shack,1,1201.1,3.19,2.402
+Hair Toffee,Gulf,The Other Factory,Secret Factory,1,706.0,2.27,1.412
+Hair Toffee,Gulf,The Other Factory,The Other Factory,1,573.5,2.07,1.147
+Hair Toffee,Pacific,The Other Factory,Lot's O' Nuts,2,259.0,2.4,1.295
+Hair Toffee,Pacific,The Other Factory,Wicked Choccy's,2,1985.9,5.86,9.929
+Hair Toffee,Pacific,The Other Factory,Sugar Shack,2,1347.9,4.48,6.739
+Hair Toffee,Pacific,The Other Factory,Secret Factory,2,1424.2,4.7,7.121
+Hair Toffee,Pacific,The Other Factory,The Other Factory,2,1443.8,4.8,7.219
+Kazookles,Atlantic,The Other Factory,Lot's O' Nuts,37,2082.4,8.46,8.386
+Kazookles,Atlantic,The Other Factory,Wicked Choccy's,37,720.4,5.74,2.901
+Kazookles,Atlantic,The Other Factory,Sugar Shack,37,1126.8,6.44,4.537
+Kazookles,Atlantic,The Other Factory,Secret Factory,37,796.6,5.85,3.208
+Kazookles,Atlantic,The Other Factory,The Other Factory,37,910.1,6.14,3.665
+Kazookles,Gulf,The Other Factory,Lot's O' Nuts,18,1628.5,7.54,7.057
+Kazookles,Gulf,The Other Factory,Wicked Choccy's,18,195.8,4.68,0.848
+Kazookles,Gulf,The Other Factory,Sugar Shack,18,1170.1,6.53,5.07
+Kazookles,Gulf,The Other Factory,Secret Factory,18,638.5,5.53,2.767
+Kazookles,Gulf,The Other Factory,The Other Factory,18,377.1,5.07,1.634
+Kazookles,Interior,The Other Factory,Lot's O' Nuts,11,940.4,6.18,3.334
+Kazookles,Interior,The Other Factory,Wicked Choccy's,11,844.4,5.99,2.994
+Kazookles,Interior,The Other Factory,Sugar Shack,11,1059.9,6.32,3.758
+Kazookles,Interior,The Other Factory,Secret Factory,11,658.1,5.58,2.333
+Kazookles,Interior,The Other Factory,The Other Factory,11,358.1,5.04,1.27
+Kazookles,Pacific,The Other Factory,Lot's O' Nuts,30,559.7,5.4,1.959
+Kazookles,Pacific,The Other Factory,Wicked Choccy's,30,2157.1,8.6,7.55
+Kazookles,Pacific,The Other Factory,Sugar Shack,30,1304.0,6.79,4.564
+Kazookles,Pacific,The Other Factory,Secret Factory,30,1499.3,7.25,5.248
+Kazookles,Pacific,The Other Factory,The Other Factory,30,1605.1,7.52,5.618
+Laffy Taffy,Atlantic,Sugar Shack,Lot's O' Nuts,6,1980.2,8.5,4.62
+Laffy Taffy,Atlantic,Sugar Shack,Wicked Choccy's,6,651.8,5.85,1.521
+Laffy Taffy,Atlantic,Sugar Shack,Sugar Shack,6,1058.3,6.56,2.469
+Laffy Taffy,Atlantic,Sugar Shack,Secret Factory,6,700.2,5.91,1.634
+Laffy Taffy,Atlantic,Sugar Shack,The Other Factory,6,807.0,6.18,1.883
+Laffy Taffy,Gulf,Sugar Shack,Lot's O' Nuts,2,1822.1,8.18,10.022
+Laffy Taffy,Gulf,Sugar Shack,Wicked Choccy's,2,299.9,5.14,1.65
+Laffy Taffy,Gulf,Sugar Shack,Sugar Shack,2,1606.7,7.64,8.837
+Laffy Taffy,Gulf,Sugar Shack,Secret Factory,2,1070.2,6.64,5.886
+Laffy Taffy,Gulf,Sugar Shack,The Other Factory,2,704.0,5.97,3.872
+Laffy Taffy,Interior,Sugar Shack,Lot's O' Nuts,1,1637.0,5.32,1.637
+Laffy Taffy,Interior,Sugar Shack,Wicked Choccy's,1,799.7,3.65,0.8
+Laffy Taffy,Interior,Sugar Shack,Sugar Shack,1,651.0,3.24,0.651
+Laffy Taffy,Interior,Sugar Shack,Secret Factory,1,333.9,2.68,0.334
+Laffy Taffy,Interior,Sugar Shack,The Other Factory,1,637.1,3.34,0.637
+Laffy Taffy,Pacific,Sugar Shack,Lot's O' Nuts,1,1124.9,6.78,1.125
+Laffy Taffy,Pacific,Sugar Shack,Wicked Choccy's,1,2358.9,9.26,2.359
+Laffy Taffy,Pacific,Sugar Shack,Sugar Shack,1,1171.3,6.77,1.171
+Laffy Taffy,Pacific,Sugar Shack,Secret Factory,1,1569.0,7.64,1.569
+Laffy Taffy,Pacific,Sugar Shack,The Other Factory,1,1826.7,8.21,1.827
+Lickable Wallpaper,Atlantic,Secret Factory,Lot's O' Nuts,35,1977.1,8.33,7.852
+Lickable Wallpaper,Atlantic,Secret Factory,Wicked Choccy's,35,692.0,5.76,2.748
+Lickable Wallpaper,Atlantic,Secret Factory,Sugar Shack,35,1026.8,6.33,4.078
+Lickable Wallpaper,Atlantic,Secret Factory,Secret Factory,35,688.3,5.72,2.733
+Lickable Wallpaper,Atlantic,Secret Factory,The Other Factory,35,821.1,6.04,3.261
+Lickable Wallpaper,Gulf,Secret Factory,Lot's O' Nuts,10,1527.7,7.43,5.653
+Lickable Wallpaper,Gulf,Secret Factory,Wicked Choccy's,10,275.0,4.92,1.018
+Lickable Wallpaper,Gulf,Secret Factory,Sugar Shack,10,1125.9,6.52,4.166
+Lickable Wallpaper,Gulf,Secret Factory,Secret Factory,10,589.4,5.52,2.181
+Lickable Wallpaper,Gulf,Secret Factory,The Other Factory,10,280.1,4.96,1.036
+Lickable Wallpaper,Interior,Secret Factory,Lot's O' Nuts,15,1194.9,6.78,5.656
+Lickable Wallpaper,Interior,Secret Factory,Wicked Choccy's,15,748.9,5.89,3.545
+Lickable Wallpaper,Interior,Secret Factory,Sugar Shack,15,689.4,5.67,3.263
+Lickable Wallpaper,Interior,Secret Factory,Secret Factory,15,198.0,4.75,0.937
+Lickable Wallpaper,Interior,Secret Factory,The Other Factory,15,263.9,4.94,1.249
+Lickable Wallpaper,Pacific,Secret Factory,Lot's O' Nuts,34,512.5,5.39,2.201
+Lickable Wallpaper,Pacific,Secret Factory,Wicked Choccy's,34,2066.0,8.51,8.871
+Lickable Wallpaper,Pacific,Secret Factory,Sugar Shack,34,1220.0,6.71,5.239
+Lickable Wallpaper,Pacific,Secret Factory,Secret Factory,34,1406.0,7.15,6.038
+Lickable Wallpaper,Pacific,Secret Factory,The Other Factory,34,1513.7,7.42,6.5
+Nerds,Atlantic,Sugar Shack,Lot's O' Nuts,4,2086.1,8.2,5.215
+Nerds,Atlantic,Sugar Shack,Wicked Choccy's,4,759.3,5.55,1.898
+Nerds,Atlantic,Sugar Shack,Sugar Shack,4,1104.3,6.13,2.761
+Nerds,Atlantic,Sugar Shack,Secret Factory,4,793.6,5.58,1.984
+Nerds,Atlantic,Sugar Shack,The Other Factory,4,928.5,5.91,2.321
+SweeTARTS,Atlantic,Sugar Shack,Lot's O' Nuts,5,1993.9,8.24,9.571
+SweeTARTS,Atlantic,Sugar Shack,Wicked Choccy's,5,674.2,5.61,3.236
+SweeTARTS,Atlantic,Sugar Shack,Sugar Shack,5,1057.6,6.27,5.076
+SweeTARTS,Atlantic,Sugar Shack,Secret Factory,5,710.0,5.64,3.408
+SweeTARTS,Atlantic,Sugar Shack,The Other Factory,5,826.3,5.93,3.966
+SweeTARTS,Interior,Sugar Shack,Lot's O' Nuts,4,994.2,6.25,3.231
+SweeTARTS,Interior,Sugar Shack,Wicked Choccy's,4,790.0,5.85,2.567
+SweeTARTS,Interior,Sugar Shack,Sugar Shack,4,987.0,6.14,3.208
+SweeTARTS,Interior,Sugar Shack,Secret Factory,4,566.0,5.36,1.839
+SweeTARTS,Interior,Sugar Shack,The Other Factory,4,274.6,4.84,0.892
+SweeTARTS,Pacific,Sugar Shack,Lot's O' Nuts,1,502.8,3.74,2.011
+SweeTARTS,Pacific,Sugar Shack,Wicked Choccy's,1,2211.3,7.17,8.845
+SweeTARTS,Pacific,Sugar Shack,Sugar Shack,1,1452.9,5.54,5.812
+SweeTARTS,Pacific,Sugar Shack,Secret Factory,1,1602.7,5.91,6.411
+SweeTARTS,Pacific,Sugar Shack,The Other Factory,1,1663.7,6.09,6.655
+Wonka Bar - Fudge Mallows,Atlantic,Lot's O' Nuts,Lot's O' Nuts,548,2016.5,8.42,7.389
+Wonka Bar - Fudge Mallows,Atlantic,Lot's O' Nuts,Wicked Choccy's,548,708.4,5.81,2.596
+Wonka Bar - Fudge Mallows,Atlantic,Lot's O' Nuts,Sugar Shack,548,1058.8,6.41,3.88
+Wonka Bar - Fudge Mallows,Atlantic,Lot's O' Nuts,Secret Factory,548,727.4,5.81,2.665
+Wonka Bar - Fudge Mallows,Atlantic,Lot's O' Nuts,The Other Factory,548,857.1,6.13,3.141
+Wonka Bar - Fudge Mallows,Gulf,Lot's O' Nuts,Lot's O' Nuts,291,1660.2,7.71,6.173
+Wonka Bar - Fudge Mallows,Gulf,Lot's O' Nuts,Wicked Choccy's,291,154.3,4.7,0.574
+Wonka Bar - Fudge Mallows,Gulf,Lot's O' Nuts,Sugar Shack,291,1210.4,6.7,4.501
+Wonka Bar - Fudge Mallows,Gulf,Lot's O' Nuts,Secret Factory,291,679.6,5.71,2.527
+Wonka Bar - Fudge Mallows,Gulf,Lot's O' Nuts,The Other Factory,291,412.5,5.24,1.534
+Wonka Bar - Fudge Mallows,Interior,Lot's O' Nuts,Lot's O' Nuts,410,1109.7,6.61,4.317
+Wonka Bar - Fudge Mallows,Interior,Lot's O' Nuts,Wicked Choccy's,410,743.8,5.89,2.894
+Wonka Bar - Fudge Mallows,Interior,Lot's O' Nuts,Sugar Shack,410,793.5,5.88,3.087
+Wonka Bar - Fudge Mallows,Interior,Lot's O' Nuts,Secret Factory,410,335.0,5.03,1.303
+Wonka Bar - Fudge Mallows,Interior,Lot's O' Nuts,The Other Factory,410,199.7,4.82,0.777
+Wonka Bar - Fudge Mallows,Pacific,Lot's O' Nuts,Lot's O' Nuts,569,543.8,5.47,2.13
+Wonka Bar - Fudge Mallows,Pacific,Lot's O' Nuts,Wicked Choccy's,569,2135.0,8.65,8.364
+Wonka Bar - Fudge Mallows,Pacific,Lot's O' Nuts,Sugar Shack,569,1286.5,6.85,5.04
+Wonka Bar - Fudge Mallows,Pacific,Lot's O' Nuts,Secret Factory,569,1478.1,7.3,5.79
+Wonka Bar - Fudge Mallows,Pacific,Lot's O' Nuts,The Other Factory,569,1583.0,7.57,6.201
+Wonka Bar - Milk Chocolate,Atlantic,Wicked Choccy's,Lot's O' Nuts,639,2028.3,8.45,7.415
+Wonka Bar - Milk Chocolate,Atlantic,Wicked Choccy's,Wicked Choccy's,639,738.5,5.88,2.7
+Wonka Bar - Milk Chocolate,Atlantic,Wicked Choccy's,Sugar Shack,639,1051.3,6.4,3.843
+Wonka Bar - Milk Chocolate,Atlantic,Wicked Choccy's,Secret Factory,639,734.8,5.83,2.686
+Wonka Bar - Milk Chocolate,Atlantic,Wicked Choccy's,The Other Factory,639,878.3,6.18,3.211
+Wonka Bar - Milk Chocolate,Gulf,Wicked Choccy's,Lot's O' Nuts,333,1657.3,7.71,6.749
+Wonka Bar - Milk Chocolate,Gulf,Wicked Choccy's,Wicked Choccy's,333,156.3,4.71,0.637
+Wonka Bar - Milk Chocolate,Gulf,Wicked Choccy's,Sugar Shack,333,1208.9,6.71,4.923
+Wonka Bar - Milk Chocolate,Gulf,Wicked Choccy's,Secret Factory,333,677.9,5.71,2.76
+Wonka Bar - Milk Chocolate,Gulf,Wicked Choccy's,The Other Factory,333,409.7,5.24,1.669
+Wonka Bar - Milk Chocolate,Interior,Wicked Choccy's,Lot's O' Nuts,499,1112.0,6.63,4.165
+Wonka Bar - Milk Chocolate,Interior,Wicked Choccy's,Wicked Choccy's,499,751.7,5.91,2.815
+Wonka Bar - Milk Chocolate,Interior,Wicked Choccy's,Sugar Shack,499,775.7,5.85,2.905
+Wonka Bar - Milk Chocolate,Interior,Wicked Choccy's,Secret Factory,499,318.3,5.01,1.192
+Wonka Bar - Milk Chocolate,Interior,Wicked Choccy's,The Other Factory,499,211.6,4.85,0.793
+Wonka Bar - Milk Chocolate,Pacific,Wicked Choccy's,Lot's O' Nuts,666,523.6,5.43,2.127
+Wonka Bar - Milk Chocolate,Pacific,Wicked Choccy's,Wicked Choccy's,666,2118.1,8.63,8.606
+Wonka Bar - Milk Chocolate,Pacific,Wicked Choccy's,Sugar Shack,666,1280.7,6.85,5.203
+Wonka Bar - Milk Chocolate,Pacific,Wicked Choccy's,Secret Factory,666,1465.4,7.28,5.954
+Wonka Bar - Milk Chocolate,Pacific,Wicked Choccy's,The Other Factory,666,1566.2,7.55,6.364
+Wonka Bar - Nutty Crunch Surprise,Atlantic,Lot's O' Nuts,Lot's O' Nuts,490,2023.2,8.45,7.668
+Wonka Bar - Nutty Crunch Surprise,Atlantic,Lot's O' Nuts,Wicked Choccy's,490,701.3,5.81,2.658
+Wonka Bar - Nutty Crunch Surprise,Atlantic,Lot's O' Nuts,Sugar Shack,490,1071.3,6.45,4.06
+Wonka Bar - Nutty Crunch Surprise,Atlantic,Lot's O' Nuts,Secret Factory,490,736.0,5.84,2.789
+Wonka Bar - Nutty Crunch Surprise,Atlantic,Lot's O' Nuts,The Other Factory,490,859.1,6.15,3.256
+Wonka Bar - Nutty Crunch Surprise,Gulf,Lot's O' Nuts,Lot's O' Nuts,296,1639.5,7.68,6.026
+Wonka Bar - Nutty Crunch Surprise,Gulf,Lot's O' Nuts,Wicked Choccy's,296,166.4,4.74,0.612
+Wonka Bar - Nutty Crunch Surprise,Gulf,Lot's O' Nuts,Sugar Shack,296,1204.7,6.71,4.428
+Wonka Bar - Nutty Crunch Surprise,Gulf,Lot's O' Nuts,Secret Factory,296,672.1,5.71,2.471
+Wonka Bar - Nutty Crunch Surprise,Gulf,Lot's O' Nuts,The Other Factory,296,393.7,5.21,1.447
+Wonka Bar - Nutty Crunch Surprise,Interior,Lot's O' Nuts,Lot's O' Nuts,452,1128.8,6.67,4.23
+Wonka Bar - Nutty Crunch Surprise,Interior,Lot's O' Nuts,Wicked Choccy's,452,746.8,5.91,2.799
+Wonka Bar - Nutty Crunch Surprise,Interior,Lot's O' Nuts,Sugar Shack,452,761.3,5.83,2.853
+Wonka Bar - Nutty Crunch Surprise,Interior,Lot's O' Nuts,Secret Factory,452,296.8,4.97,1.112
+Wonka Bar - Nutty Crunch Surprise,Interior,Lot's O' Nuts,The Other Factory,452,214.1,4.87,0.802
+Wonka Bar - Nutty Crunch Surprise,Pacific,Lot's O' Nuts,Lot's O' Nuts,572,559.7,5.52,2.07
+Wonka Bar - Nutty Crunch Surprise,Pacific,Lot's O' Nuts,Wicked Choccy's,572,2156.0,8.71,7.976
+Wonka Bar - Nutty Crunch Surprise,Pacific,Lot's O' Nuts,Sugar Shack,572,1302.5,6.9,4.818
+Wonka Bar - Nutty Crunch Surprise,Pacific,Lot's O' Nuts,Secret Factory,572,1498.0,7.36,5.541
+Wonka Bar - Nutty Crunch Surprise,Pacific,Lot's O' Nuts,The Other Factory,572,1604.0,7.63,5.934
+Wonka Bar - Triple Dazzle Caramel,Atlantic,Wicked Choccy's,Lot's O' Nuts,558,2004.5,8.42,7.493
+Wonka Bar - Triple Dazzle Caramel,Atlantic,Wicked Choccy's,Wicked Choccy's,558,693.9,5.8,2.594
+Wonka Bar - Triple Dazzle Caramel,Atlantic,Wicked Choccy's,Sugar Shack,558,1055.4,6.42,3.946
+Wonka Bar - Triple Dazzle Caramel,Atlantic,Wicked Choccy's,Secret Factory,558,717.2,5.81,2.681
+Wonka Bar - Triple Dazzle Caramel,Atlantic,Wicked Choccy's,The Other Factory,558,842.2,6.12,3.148
+Wonka Bar - Triple Dazzle Caramel,Gulf,Wicked Choccy's,Lot's O' Nuts,330,1663.8,7.74,6.166
+Wonka Bar - Triple Dazzle Caramel,Gulf,Wicked Choccy's,Wicked Choccy's,330,159.9,4.73,0.593
+Wonka Bar - Triple Dazzle Caramel,Gulf,Wicked Choccy's,Sugar Shack,330,1202.4,6.71,4.456
+Wonka Bar - Triple Dazzle Caramel,Gulf,Wicked Choccy's,Secret Factory,330,672.6,5.72,2.493
+Wonka Bar - Triple Dazzle Caramel,Gulf,Wicked Choccy's,The Other Factory,330,414.1,5.26,1.535
+Wonka Bar - Triple Dazzle Caramel,Interior,Wicked Choccy's,Lot's O' Nuts,451,1095.9,6.61,4.111
+Wonka Bar - Triple Dazzle Caramel,Interior,Wicked Choccy's,Wicked Choccy's,451,773.0,5.97,2.9
+Wonka Bar - Triple Dazzle Caramel,Interior,Wicked Choccy's,Sugar Shack,451,761.2,5.84,2.856
+Wonka Bar - Triple Dazzle Caramel,Interior,Wicked Choccy's,Secret Factory,451,315.3,5.01,1.183
+Wonka Bar - Triple Dazzle Caramel,Interior,Wicked Choccy's,The Other Factory,451,232.8,4.91,0.873
+Wonka Bar - Triple Dazzle Caramel,Pacific,Wicked Choccy's,Lot's O' Nuts,676,548.6,5.5,2.106
+Wonka Bar - Triple Dazzle Caramel,Pacific,Wicked Choccy's,Wicked Choccy's,676,2138.0,8.68,8.207
+Wonka Bar - Triple Dazzle Caramel,Pacific,Wicked Choccy's,Sugar Shack,676,1286.5,6.87,4.939
+Wonka Bar - Triple Dazzle Caramel,Pacific,Wicked Choccy's,Secret Factory,676,1479.8,7.33,5.681
+Wonka Bar - Triple Dazzle Caramel,Pacific,Wicked Choccy's,The Other Factory,676,1585.9,7.6,6.088
+Wonka Bar -Scrumdiddlyumptious,Atlantic,Lot's O' Nuts,Lot's O' Nuts,623,2032.5,8.47,7.663
+Wonka Bar -Scrumdiddlyumptious,Atlantic,Lot's O' Nuts,Wicked Choccy's,623,726.1,5.86,2.738
+Wonka Bar -Scrumdiddlyumptious,Atlantic,Lot's O' Nuts,Sugar Shack,623,1064.6,6.43,4.014
+Wonka Bar -Scrumdiddlyumptious,Atlantic,Lot's O' Nuts,Secret Factory,623,741.4,5.85,2.795
+Wonka Bar -Scrumdiddlyumptious,Atlantic,Lot's O' Nuts,The Other Factory,623,876.1,6.18,3.303
+Wonka Bar -Scrumdiddlyumptious,Gulf,Lot's O' Nuts,Lot's O' Nuts,310,1656.2,7.71,6.427
+Wonka Bar -Scrumdiddlyumptious,Gulf,Lot's O' Nuts,Wicked Choccy's,310,159.0,4.72,0.617
+Wonka Bar -Scrumdiddlyumptious,Gulf,Lot's O' Nuts,Sugar Shack,310,1206.0,6.71,4.68
+Wonka Bar -Scrumdiddlyumptious,Gulf,Lot's O' Nuts,Secret Factory,310,675.0,5.71,2.62
+Wonka Bar -Scrumdiddlyumptious,Gulf,Lot's O' Nuts,The Other Factory,310,408.1,5.24,1.584
+Wonka Bar -Scrumdiddlyumptious,Interior,Lot's O' Nuts,Lot's O' Nuts,459,1076.0,6.56,4.039
+Wonka Bar -Scrumdiddlyumptious,Interior,Lot's O' Nuts,Wicked Choccy's,459,756.9,5.93,2.841
+Wonka Bar -Scrumdiddlyumptious,Interior,Lot's O' Nuts,Sugar Shack,459,825.0,5.96,3.097
+Wonka Bar -Scrumdiddlyumptious,Interior,Lot's O' Nuts,Secret Factory,459,380.1,5.13,1.427
+Wonka Bar -Scrumdiddlyumptious,Interior,Lot's O' Nuts,The Other Factory,459,205.2,4.84,0.77
+Wonka Bar -Scrumdiddlyumptious,Pacific,Lot's O' Nuts,Lot's O' Nuts,672,531.5,5.46,1.952
+Wonka Bar -Scrumdiddlyumptious,Pacific,Lot's O' Nuts,Wicked Choccy's,672,2113.7,8.62,7.763
+Wonka Bar -Scrumdiddlyumptious,Pacific,Lot's O' Nuts,Sugar Shack,672,1267.5,6.83,4.655
+Wonka Bar -Scrumdiddlyumptious,Pacific,Lot's O' Nuts,Secret Factory,672,1456.6,7.27,5.349
+Wonka Bar -Scrumdiddlyumptious,Pacific,Lot's O' Nuts,The Other Factory,672,1561.6,7.54,5.735
+Wonka Gum,Atlantic,Secret Factory,Lot's O' Nuts,37,2001.9,8.33,9.144
+Wonka Gum,Atlantic,Secret Factory,Wicked Choccy's,37,676.3,5.68,3.089
+Wonka Gum,Atlantic,Secret Factory,Sugar Shack,37,1064.8,6.36,4.864
+Wonka Gum,Atlantic,Secret Factory,Secret Factory,37,718.1,5.73,3.28
+Wonka Gum,Atlantic,Secret Factory,The Other Factory,37,833.1,6.02,3.805
+Wonka Gum,Gulf,Secret Factory,Lot's O' Nuts,26,1631.0,7.59,7.528
+Wonka Gum,Gulf,Secret Factory,Wicked Choccy's,26,156.8,4.64,0.724
+Wonka Gum,Gulf,Secret Factory,Sugar Shack,26,1234.6,6.69,5.698
+Wonka Gum,Gulf,Secret Factory,Secret Factory,26,700.0,5.69,3.231
+Wonka Gum,Gulf,Secret Factory,The Other Factory,26,395.6,5.14,1.826
+Wonka Gum,Interior,Secret Factory,Lot's O' Nuts,29,1211.9,6.76,4.681
+Wonka Gum,Interior,Secret Factory,Wicked Choccy's,29,710.0,5.76,2.742
+Wonka Gum,Interior,Secret Factory,Sugar Shack,29,728.4,5.69,2.813
+Wonka Gum,Interior,Secret Factory,Secret Factory,29,225.1,4.75,0.869
+Wonka Gum,Interior,Secret Factory,The Other Factory,29,224.7,4.81,0.868
+Wonka Gum,Pacific,Secret Factory,Lot's O' Nuts,28,421.5,5.16,1.159
+Wonka Gum,Pacific,Secret Factory,Wicked Choccy's,28,2026.3,8.38,5.572
+Wonka Gum,Pacific,Secret Factory,Sugar Shack,28,1246.3,6.71,3.427
+Wonka Gum,Pacific,Secret Factory,Secret Factory,28,1395.3,7.08,3.837
+Wonka Gum,Pacific,Secret Factory,The Other Factory,28,1475.6,7.3,4.058

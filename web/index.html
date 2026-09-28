@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nassau Candy — Factory Reallocation Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Chart.js ships with the app (no internet needed); CDN only as a backup -->
+<script src="vendor/chart.umd.min.js"></script>
+<script>window.Chart || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"><\/script>');</script>
+<script>
+// If charts still can't load, keep everything else on the page working.
+if (!window.Chart) {
+  window.Chart = function(){ return {destroy(){}, update(){}}; };
+  window.Chart.defaults = {font:{}};
+  window.Chart.getChart = function(){ return null; };
+  window.__CHARTS_UNAVAILABLE__ = true;
+}
+</script>
+<style>
+:root{
+  --paper:#FFFFFF; --paper-2:#FAF7EF; --paper-3:#F2EEE2;
+  --ink:#221D14; --ink-dim:#5B5346; --ink-faint:#8C8371;
+  --line:#E7E1D2;
+  --gold:#A9791F; --gold-deep:#7C5A17; --gold-tint:#F7EDD6;
+  --black:#161311;
+  --good:#1B9E8F; --bad:#D93A2E;
+  --radius:12px;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:78px; scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',system-ui,sans-serif; font-size:15px; line-height:1.55;}
+::selection{background:var(--gold-tint); color:var(--gold-deep);}
+p{margin:0;}
+button{font-family:inherit;}
+
+/* ---------- utility bar ---------- */
+.util-bar{background:var(--paper-3); border-bottom:1px solid var(--line); font-size:12.5px; color:var(--ink-dim); padding:7px 24px; display:flex; justify-content:space-between; align-items:center;}
+.util-bar .right{display:flex; gap:16px;}
+.live-dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--good); margin-right:6px; animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(27,158,143,.5);} 70%{box-shadow:0 0 0 6px rgba(27,158,143,0);}}
+
+/* ---------- header ---------- */
+header.masthead{padding:34px 24px 8px; text-align:center;}
+.wordmark{
+  font-family:'Playfair Display',serif; font-weight:700; font-size:38px; letter-spacing:.05em; margin:0;
+  background:linear-gradient(100deg, var(--gold-deep), var(--gold) 45%, var(--gold-deep) 90%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  background-size:200% auto; animation:shine 7s ease-in-out infinite;
+}
+@keyframes shine{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.wordmark-sub{font-size:12px; letter-spacing:.24em; color:var(--ink-faint); margin-top:2px; font-weight:600;}
+.pitch{max-width:560px; margin:16px auto 0; font-size:15.5px; color:var(--ink-dim); text-align:center;}
+.pitch b{color:var(--ink);}
+
+/* ---------- sticky pill nav ---------- */
+.navbar{position:sticky; top:0; z-index:50; background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+.navbar-inner{max-width:1240px; margin:0 auto; display:flex; justify-content:center; padding:10px 16px; position:relative; overflow:hidden;}
+.pillnav{display:flex; gap:2px; background:var(--paper-3); border-radius:30px; padding:4px; position:relative; overflow-x:auto; max-width:100%; scrollbar-width:none;}
+.pillnav::-webkit-scrollbar{display:none;}
+.pillnav button{
+  position:relative; z-index:2; background:none; border:none; padding:9px 18px; border-radius:26px;
+  font-weight:700; font-size:12.5px; letter-spacing:.03em; color:var(--ink-dim); cursor:pointer;
+  transition:color .25s ease; white-space:nowrap; flex-shrink:0;
+}
+.pillnav button.active{color:#fff;}
+.pillnav .indicator{
+  position:absolute; top:4px; bottom:4px; left:4px; width:60px; background:var(--black); border-radius:26px;
+  transition:left .32s cubic-bezier(.65,0,.35,1), width .32s cubic-bezier(.65,0,.35,1); z-index:1;
+}
+
+.wrap{max-width:1240px; margin:0 auto; padding:30px 24px 70px;}
+
+/* ---------- network hero ---------- */
+.hero-card{background:var(--paper-2); border:1px solid var(--line); border-radius:16px; padding:22px 24px 10px; margin-bottom:26px; overflow:hidden;}
+.hero-card .hd{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:6px;}
+.hero-card h2{font-family:'Playfair Display',serif; font-size:19px; margin:0;}
+.hero-card .cap{font-size:12.5px; color:var(--ink-faint); max-width:420px;}
+.net-stats{display:flex; gap:22px; flex-wrap:wrap;}
+.net-stats .s{text-align:right;}
+.net-stats .s .v{font-family:'Playfair Display',serif; font-weight:700; font-size:22px; color:var(--gold-deep); font-variant-numeric:tabular-nums;}
+.net-stats .s .l{font-size:10.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em;}
+@media (max-width:600px){
+  .hero-card .hd{flex-direction:column;}
+  .net-stats{width:100%; justify-content:space-between; gap:10px;}
+  .net-stats .s{text-align:left;}
+}
+#network-svg{width:100%; height:auto; display:block;}
+.net-legend{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; padding:6px 0 14px; font-size:12px; color:var(--ink-dim);}
+.net-legend span{display:inline-flex; align-items:center; gap:6px;}
+.net-legend i{width:9px; height:9px; border-radius:50%; display:inline-block;}
+.net-hint{text-align:center; font-size:11.5px; color:var(--ink-faint); padding-bottom:14px;}
+
+/* ---------- route map ---------- */
+#route-svg{width:100%; height:auto; display:block; background:var(--paper-2); border-radius:8px;}
+.route-legend{display:flex; flex-wrap:wrap; gap:18px; margin-top:12px; font-size:12.5px; color:var(--ink-dim);}
+.route-legend .li{display:flex; align-items:center; gap:7px;}
+.route-legend .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block;}
+.route-legend .swatch.dashed{border-top-style:dashed;}
+.route-stats{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;}
+.route-stat{border:1px solid var(--line); border-radius:10px; padding:12px 14px;}
+.route-stat .rs-head{font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:7px;}
+.route-stat .rs-dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+.route-stat .rs-row{display:flex; justify-content:space-between; font-size:13.5px; padding:3px 0;}
+.route-stat .rs-row b{font-variant-numeric:tabular-nums;}
+.route-delta{margin-top:10px; font-size:12.5px; color:var(--ink-dim); text-align:center;}
+.route-delta b{color:var(--bad);}
+@media (max-width:640px){ .route-stats{grid-template-columns:1fr;} }
+
+/* ---------- quicklook ---------- */
+.quicklook{max-width:480px; margin:20px auto 0; display:flex; border:1.5px solid var(--ink); border-radius:24px; overflow:hidden;}
+.quicklook input{flex:1; border:none; padding:11px 18px; font:inherit; font-size:14px; background:var(--paper);}
+.quicklook input:focus{outline:none;}
+.quicklook button{border:none; background:var(--ink); color:#fff; padding:0 20px; font-weight:600; cursor:pointer; font-size:13px;}
+.quicklook button:hover{background:var(--gold-deep);}
+
+/* ---------- section chrome ---------- */
+/* all four sections are always on the page; the nav scrolls between them */
+section.view{display:block; padding-top:44px; margin-top:44px; border-top:1px solid var(--line);}
+section.view#sim{border-top:none; margin-top:10px; padding-top:20px;}
+section.view#risk{min-height:calc(100vh - 90px);}
+.section-head{margin-bottom:20px; text-align:center;}
+.section-head .eyebrow{font-size:11px; letter-spacing:.16em; color:var(--gold-deep); font-weight:700; text-transform:uppercase;}
+.section-head h2{font-family:'Playfair Display',serif; font-size:26px; margin:6px 0 8px;}
+.section-head p{color:var(--ink-dim); max-width:560px; margin:0 auto; font-size:14.5px;}
+
+.steps{display:flex; flex-direction:column; gap:18px; margin-bottom:22px;}
+.step{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px;}
+.step .stephead{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+.step .num{width:22px; height:22px; border-radius:50%; background:var(--gold); color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.step .lbl{font-weight:700; font-size:13.5px;}
+
+.chips{display:flex; gap:8px; flex-wrap:wrap;}
+.chip{
+  border:1.5px solid var(--line); background:var(--paper); color:var(--ink-dim); padding:8px 16px; border-radius:22px;
+  font-size:13px; font-weight:600; cursor:pointer; transition:all .15s ease; user-select:none;
+}
+.chip:hover{border-color:var(--gold); color:var(--ink);}
+.chip.active{background:var(--black); border-color:var(--black); color:#fff;}
+.chip.factory-chip.active{color:#fff;}
+
+.combo{position:relative;}
+.combo input{
+  width:100%; border:1.5px solid var(--line); border-radius:8px; padding:11px 14px; font:inherit; font-size:14.5px;
+  background:var(--paper); color:var(--ink);
+}
+.combo input:focus{outline:none; border-color:var(--gold);}
+.combo .menu{
+  position:absolute; top:calc(100% + 6px); left:0; right:0; background:#fff; border:1px solid var(--line);
+  border-radius:10px; max-height:240px; overflow-y:auto; box-shadow:0 16px 34px rgba(34,29,20,.14); z-index:30;
+  display:none;
+}
+.combo .menu.open{display:block;}
+.combo .menu .opt{padding:10px 14px; cursor:pointer; font-size:13.5px; display:flex; align-items:center; gap:8px;}
+.combo .menu .opt:hover, .combo .menu .opt.hi{background:var(--paper-2);}
+.combo .menu .opt i{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+
+.grid{display:grid; gap:16px;}
+.grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.grid.cols-2{grid-template-columns:repeat(2,1fr);}
+@media (max-width:820px){.grid.cols-3,.grid.cols-2{grid-template-columns:1fr;}}
+
+.card{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px;}
+.card h3{font-family:'Playfair Display',serif; font-weight:700; font-size:17px; margin:0 0 4px;}
+.card .sub{color:var(--ink-faint); font-size:13px; margin-bottom:14px;}
+
+.chart-box{position:relative; height:280px;}
+.chart-box.tall{height:320px;}
+
+/* leaderboard (replaces plain factory table) */
+.leaderboard{display:flex; flex-direction:column; gap:8px;}
+.lb-row{
+  display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:10px; border:1px solid var(--line);
+  background:var(--paper); transition:transform .18s ease, box-shadow .18s ease;
+}
+.lb-row:hover{transform:translateX(3px); box-shadow:0 8px 18px rgba(34,29,20,.06);}
+.lb-row.current{border-color:var(--gold); background:var(--gold-tint);}
+.lb-rank{width:22px; height:22px; border-radius:50%; background:var(--paper-3); color:var(--ink-dim); font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.lb-rank.top{background:var(--gold); color:#fff;}
+.lb-dot{width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+.lb-name{flex:1; font-weight:700; font-size:13.5px; min-width:120px;}
+.lb-bar-wrap{flex:2; background:var(--paper-3); border-radius:6px; height:8px; overflow:hidden; min-width:80px;}
+.lb-bar{height:100%; border-radius:6px; transition:width .7s cubic-bezier(.2,.8,.2,1);}
+.lb-val{width:78px; text-align:right; font-weight:700; font-size:13px; font-variant-numeric:tabular-nums;}
+.lb-tag{font-size:10px; font-weight:800; letter-spacing:.04em; background:var(--gold); color:#fff; padding:2px 8px; border-radius:10px;}
+
+.pill{display:inline-block; padding:2px 10px; border-radius:20px; font-size:11.5px; font-weight:700;}
+.pill.good{background:rgba(27,158,143,.12); color:var(--good);}
+.pill.bad{background:rgba(217,58,46,.12); color:var(--bad);}
+.pill.current{background:var(--gold-tint); color:var(--gold-deep);}
+
+.metric{display:flex; flex-direction:column; gap:2px;}
+.metric .v{font-family:'Playfair Display',serif; font-size:26px; font-weight:700; font-variant-numeric:tabular-nums;}
+.metric .l{color:var(--ink-faint); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;}
+.metric .d{font-size:12.5px; font-weight:700;}
+.metric .d.up{color:var(--good);} .metric .d.down{color:var(--bad);}
+
+/* pick cards (curated top recommendations) */
+.pick-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:22px;}
+@media (max-width:900px){.pick-cards{grid-template-columns:1fr;}}
+.pick-card{
+  border-radius:14px; padding:18px; background:var(--paper); border:1px solid var(--line);
+  transition:transform .2s ease, box-shadow .2s ease; position:relative; overflow:hidden;
+}
+.pick-card:hover{transform:translateY(-5px); box-shadow:0 18px 32px rgba(34,29,20,.1);}
+.pick-card .rank{position:absolute; top:14px; right:16px; font-family:'Playfair Display',serif; font-size:34px; font-weight:700; color:var(--paper-3);}
+.pick-card .region{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--gold-deep); font-weight:800; margin-bottom:4px;}
+.pick-card .prod{font-weight:700; font-size:15px; margin-bottom:12px; padding-right:40px;}
+.pick-card .route{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-dim); margin-bottom:10px;}
+.pick-card .route b{color:var(--ink);}
+.pick-card .arrow{color:var(--gold);}
+.pick-card .stat-row{display:flex; gap:14px; margin-top:6px;}
+.pick-card .stat{flex:1;}
+.pick-card .stat .v{font-family:'Playfair Display',serif; font-weight:700; font-size:19px;}
+.pick-card .stat .l{font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em;}
+
+.reveal-toggle{
+  display:flex; align-items:center; gap:8px; justify-content:center; margin:6px auto 18px; background:none;
+  border:1.5px dashed var(--line); color:var(--ink-dim); padding:10px 20px; border-radius:24px; cursor:pointer;
+  font-weight:700; font-size:12.5px; transition:all .15s ease; width:fit-content;
+}
+.reveal-toggle:hover{border-color:var(--gold); color:var(--gold-deep);}
+.reveal-toggle .chev{transition:transform .25s ease;}
+.reveal-toggle.open .chev{transform:rotate(180deg);}
+.reveal-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.reveal-body.open{max-height:2400px;}
+
+table{width:100%; border-collapse:collapse; font-size:13px;}
+th{text-align:left; color:var(--ink-faint); font-weight:700; font-size:11px; letter-spacing:.04em; text-transform:uppercase; padding:9px 10px; border-bottom:2px solid var(--line); position:sticky; top:0; background:var(--paper);}
+td{padding:9px 10px; border-bottom:1px solid var(--line); color:var(--ink-dim);}
+tr{transition:background .12s ease;}
+tr:hover td{background:var(--paper-2); color:var(--ink);}
+.table-wrap{max-height:420px; overflow:auto; border-radius:10px; border:1px solid var(--line);}
+.table-wrap table{border:none;}
+
+
+.risk-flag{display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:10px; background:var(--paper-2); border:1px solid var(--line); margin-bottom:10px;}
+.risk-flag .ic{font-size:20px; flex-shrink:0;}
+.risk-flag b{color:var(--ink);}
+
+.badge-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+.badge{background:var(--paper-2); border:1px solid var(--line); border-radius:7px; padding:6px 10px; font-size:12.5px; color:var(--ink-dim);}
+.badge b{color:var(--gold-deep);}
+
+.tooltip-ic{
+  display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%;
+  background:var(--paper-3); color:var(--ink-faint); font-size:10px; font-weight:800; cursor:help; margin-left:5px;
+  position:relative;
+}
+.tooltip-ic:hover .tt{opacity:1; transform:translateY(0) translateX(-50%);}
+.tooltip-ic .tt{
+  position:absolute; bottom:130%; left:50%; transform:translateY(4px) translateX(-50%); background:var(--black); color:#fff;
+  font-size:11.5px; font-weight:500; padding:8px 11px; border-radius:7px; width:200px; opacity:0; pointer-events:none;
+  transition:all .15s ease; z-index:40; line-height:1.4;
+}
+
+.stars{color:var(--good); letter-spacing:2px; font-size:14px;}
+.rating-strip{display:flex; align-items:center; justify-content:center; gap:10px; padding:16px; background:var(--paper-2); border-radius:var(--radius); margin:26px 0; font-size:13.5px; color:var(--ink-dim); flex-wrap:wrap; text-align:center;}
+
+/* ---------- decision card (simulator answer) ---------- */
+.decision{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); border:1.5px solid var(--black); border-radius:16px; overflow:hidden; margin-bottom:22px; box-shadow:0 14px 30px rgba(34,29,20,.08);}
+.decision .main{background:var(--black); color:#fff; padding:24px 26px;}
+.decision .side{background:#fff; padding:22px 24px; display:flex; flex-direction:column; gap:16px;}
+.dec-label{font-size:11px; letter-spacing:.16em; font-weight:800; text-transform:uppercase; color:#E4C27A;}
+.dec-factory{font-family:'Playfair Display',serif; font-size:30px; font-weight:700; margin:6px 0 14px; display:flex; align-items:center; gap:10px; line-height:1.15;}
+.dec-factory i{width:12px; height:12px; border-radius:50%; flex-shrink:0;}
+.dec-days{font-family:'Playfair Display',serif; font-size:46px; font-weight:700; color:#E4C27A; line-height:1; font-variant-numeric:tabular-nums;}
+.dec-days small{font-family:'Inter',sans-serif; font-size:15px; font-weight:600; color:#CFC6B4; margin-left:4px;}
+.dec-delta{margin-top:10px; font-weight:800; font-size:15px; color:#5FD3C4;}
+.dec-delta.same{color:#CFC6B4; font-weight:600;}
+.dec-cost{margin-top:14px; font-size:13.5px; color:#CFC6B4;}
+.dec-cost b{color:#fff;}
+.dec-q{font-size:10.5px; letter-spacing:.12em; font-weight:800; text-transform:uppercase; color:var(--ink-faint); margin-bottom:3px;}
+.dec-context{font-weight:700; font-size:15px;}
+.dec-context span{color:var(--ink-faint); font-weight:500;}
+.swap{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px;}
+.swap .box{border:1px solid var(--line); border-radius:10px; padding:10px 12px;}
+.swap .box.rec{border-color:var(--gold); background:var(--gold-tint);}
+.swap .box .n{font-weight:700; font-size:14px;}
+.swap .box .t{font-size:13px; color:var(--ink-dim); font-variant-numeric:tabular-nums;}
+.swap .arr{font-size:20px; color:var(--gold); font-weight:800;}
+.dec-impact{font-size:14px; color:var(--ink-dim);}
+.dec-impact b{color:var(--ink);}
+.dec-action{font-size:13.5px; background:var(--paper-2); border-radius:8px; padding:9px 12px; color:var(--ink);}
+@media (max-width:760px){ .decision{grid-template-columns:1fr;} .dec-days{font-size:38px;} }
+.fine{font-size:11.5px; color:var(--ink-faint);}
+
+/* leaderboard best row */
+.lb-row.best{border:1.5px solid var(--good); background:rgba(27,158,143,.06);}
+.lb-tag.best{background:var(--good);}
+.lb-tags{display:flex; gap:5px; flex-shrink:0;}
+@media (max-width:600px){
+  .lb-row{flex-wrap:wrap; row-gap:8px;}
+  .lb-name{min-width:0; flex:1 1 auto;}
+  .lb-bar-wrap{order:10; flex:1 1 100%; min-width:0;}
+  .lb-val{width:auto;}
+}
+
+/* route comparison */
+.route-cmp{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:14px;}
+.route-cmp .col{border:1px solid var(--line); border-radius:10px; padding:12px 14px;}
+.route-cmp .col.rec{border-color:var(--gold); background:var(--gold-tint);}
+.route-cmp .col.save{border-color:var(--good); background:rgba(27,158,143,.07);}
+.route-cmp .hd{font-size:11px; letter-spacing:.1em; font-weight:800; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px; display:flex; align-items:center; gap:7px;}
+.route-cmp .col.save .hd{color:var(--good);}
+.route-cmp .v{font-weight:700; font-size:15px; font-variant-numeric:tabular-nums; line-height:1.6;}
+.route-cmp .v span{font-weight:500; color:var(--ink-faint); font-size:12.5px;}
+@media (max-width:640px){ .route-cmp{grid-template-columns:1fr;} }
+
+/* compare */
+.cmp-setup{display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,.8fr) minmax(0,1.6fr); gap:18px; align-items:start; background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; margin-bottom:18px;}
+@media (max-width:860px){ .cmp-setup{grid-template-columns:1fr;} }
+.cmp-current{display:flex; align-items:center; gap:8px; font-weight:700; font-size:15px; padding:10px 0;}
+.cmp-current i{width:10px; height:10px; border-radius:50%;}
+.cmp-result{border:1.5px solid var(--black); border-radius:14px; padding:20px 22px; margin-bottom:18px;}
+.cmp-verdict{font-family:'Playfair Display',serif; font-size:22px; font-weight:700; margin-bottom:16px;}
+.cmp-verdict .good{color:var(--good);} .cmp-verdict .bad{color:var(--bad);}
+.kpis{display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line);}
+.kpis .k{padding:14px 16px 4px 0;}
+.kpis .k + .k{border-left:1px solid var(--line); padding-left:16px;}
+.kpis .l{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); font-weight:700;}
+.kpis .v{font-family:'Playfair Display',serif; font-size:24px; font-weight:700; font-variant-numeric:tabular-nums;}
+.kpis .d{font-size:12.5px; font-weight:700;}
+.kpis .d.up{color:var(--good);} .kpis .d.down{color:var(--bad);}
+.kpis .x{font-size:12.5px; color:var(--ink-dim); font-variant-numeric:tabular-nums;}
+@media (max-width:640px){ .kpis{grid-template-columns:1fr;} .kpis .k + .k{border-left:none; border-top:1px solid var(--line); padding-left:0;} }
+
+/* opportunity cards */
+.opp-card{border:1.5px solid var(--line); border-radius:14px; padding:20px; background:#fff; display:flex; flex-direction:column; gap:14px; transition:transform .2s ease, box-shadow .2s ease;}
+.opp-card:hover{transform:translateY(-4px); box-shadow:0 18px 32px rgba(34,29,20,.1);}
+.opp-card:first-child{border-color:var(--black);}
+.opp-top{display:flex; justify-content:space-between; align-items:center; font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:800; color:var(--gold-deep);}
+.opp-top .rk{background:var(--black); color:#fff; border-radius:12px; padding:2px 9px; letter-spacing:.04em;}
+.opp-prod{font-family:'Playfair Display',serif; font-size:20px; font-weight:700; line-height:1.2;}
+.opp-move{display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:end;}
+.opp-move b{font-size:14px;}
+.opp-move .to b{color:var(--gold-deep);}
+.opp-move .arr{color:var(--gold); font-weight:800; font-size:18px; padding-bottom:1px;}
+.opp-why{border-top:1px solid var(--line); padding-top:12px;}
+.opp-why .big{font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--good); line-height:1.1;}
+.opp-why .sm{font-size:12.5px; color:var(--ink-dim); margin-top:4px;}
+
+/* risk summaries */
+.summary-card{border:1.5px solid var(--line); border-radius:14px; padding:18px 20px; background:#fff;}
+.summary-card .sc-label{font-size:11.5px; letter-spacing:.12em; font-weight:800; text-transform:uppercase; color:var(--ink-dim);}
+.summary-card .sc-big{font-family:'Playfair Display',serif; font-size:34px; font-weight:700; margin:6px 0 2px; line-height:1.1;}
+.summary-card.warn .sc-big{color:var(--bad);}
+.summary-card.low .sc-big{color:var(--gold-deep);}
+.summary-card p{color:var(--ink-dim); font-size:14px;}
+
+footer.foot{margin-top:10px; border-top:1px solid var(--line); padding-top:22px; text-align:center;}
+footer.foot .links{display:flex; justify-content:center; gap:18px; flex-wrap:wrap; font-size:12.5px; margin-bottom:14px;}
+footer.foot .links button{color:var(--ink-dim); text-decoration:none; background:none; border:none; font:inherit; cursor:pointer;}
+footer.foot .links button:hover{color:var(--gold-deep); text-decoration:underline;}
+footer.foot .copyright{font-size:11.5px; color:var(--ink-faint); padding-bottom:6px;}
+
+.app-error{border:1.5px solid var(--bad); background:rgba(217,58,46,.06); color:var(--ink); border-radius:12px; padding:16px 18px; margin-bottom:22px; font-size:14px;}
+.app-error code{background:var(--paper-3); padding:1px 6px; border-radius:5px;}
+body.is-loading .wrap > *:not(.app-error){opacity:.35; pointer-events:none;}
+body.is-loading .navbar{pointer-events:none;}
+@media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} }
+</style>
+</head>
+<body class="is-loading">
+
+<div class="util-bar">
+  <span><span class="live-dot"></span>Factory Reallocation Console · <span id="data-status">Loading…</span></span>
+</div>
+
+<header class="masthead">
+  <h1 class="wordmark">NASSAU CANDY</h1>
+  <div class="wordmark-sub">FACTORY REALLOCATION &amp; SHIPPING INTELLIGENCE</div>
+  <p class="pitch">Find the <b>best factory to ship each product from</b> — in three clicks.</p>
+</header>
+
+<nav class="navbar"><div class="navbar-inner">
+  <div class="pillnav" id="pillnav">
+    <div class="indicator" id="pillnav-indicator"></div>
+    <button data-tab="sim" class="active">Factory Simulator</button>
+    <button data-tab="whatif">Compare</button>
+    <button data-tab="rec">Recommendations</button>
+    <button data-tab="risk">Risk & Impact Panel</button>
+  </div>
+</div></nav>
+
+<div class="wrap">
+<div class="app-error" id="app-error" hidden>
+  <b>We couldn't load the data.</b> Please refresh the page. If it keeps happening, start the app with <code>start_dashboard.bat</code> (Windows) or <code>./start.sh</code> (Mac/Linux).
+</div>
+
+<!-- NETWORK HERO -->
+<div class="hero-card">
+  <div class="hd">
+    <div>
+      <h2>Your shipping network, at a glance</h2>
+      <p class="cap">Thicker lines = more orders on that route.</p>
+    </div>
+    <div class="net-stats">
+      <div class="s"><div class="v" id="stat-orders">0</div><div class="l">Orders analyzed</div></div>
+      <div class="s"><div class="v" id="stat-routes">0</div><div class="l">Win-win routes found</div></div>
+      <div class="s"><div class="v" id="stat-uplift">$0</div><div class="l">Est. profit uplift</div></div>
+    </div>
+  </div>
+  <svg id="network-svg" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="net-legend" id="net-legend"></div>
+  <div class="net-hint">Hover a factory to trace its routes · click a region to see its recommendations</div>
+</div>
+
+<div class="quicklook">
+  <input id="quicklook-input" type="text" list="quicklook-list" placeholder="Quick lookup — jump to a product…">
+  <datalist id="quicklook-list"></datalist>
+  <button id="quicklook-go">Go →</button>
+</div>
+
+<div style="height:8px"></div>
+
+<!-- TAB 1: SIMULATOR -->
+<section id="sim" class="view">
+  <div class="section-head">
+    <div class="eyebrow">Factory Simulator</div>
+    <h2>Where should we ship this product from?</h2>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="stephead"><span class="num">1</span><span class="lbl">Step 1 · Choose product</span></div>
+      <div class="combo" id="sim-product-combo">
+        <input id="sim-product-input" type="text" placeholder="Search products…" autocomplete="off">
+        <div class="menu" id="sim-product-menu"></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="stephead"><span class="num">2</span><span class="lbl">Step 2 · Choose destination</span></div>
+      <div class="chips" id="sim-region-chips"></div>
+    </div>
+    <div class="step">
+      <div class="stephead"><span class="num">3</span><span class="lbl">Step 3 · Choose ship mode</span></div>
+      <div class="chips" id="sim-ship-chips"></div>
+    </div>
+  </div>
+
+  <!-- 1 + 2: recommendation and key impact -->
+  <div class="decision" id="sim-decision">
+    <div class="main">
+      <div class="dec-label">Recommended factory</div>
+      <div class="dec-factory"><i id="dec-dot"></i><span id="dec-factory">—</span></div>
+      <div class="dec-days" id="dec-days">—</div>
+      <div class="dec-delta" id="dec-delta"></div>
+      <div class="dec-cost">Estimated shipping cost: <b id="dec-cost">—</b> per order</div>
+    </div>
+    <div class="side">
+      <div>
+        <div class="dec-q">Product</div>
+        <div class="dec-context" id="dec-context">—</div>
+      </div>
+      <div>
+        <div class="dec-q">Current factory → Recommended factory</div>
+        <div class="swap">
+          <div class="box"><div class="n" id="dec-cur-name">—</div><div class="t" id="dec-cur-days">—</div></div>
+          <div class="arr">→</div>
+          <div class="box rec"><div class="n" id="dec-rec-name">—</div><div class="t" id="dec-rec-days">—</div></div>
+        </div>
+      </div>
+      <div class="dec-impact" id="dec-impact"></div>
+      <div class="dec-action" id="dec-action"></div>
+      <div class="fine">Lead time is a model-based estimate. Shipping cost is an estimated proxy.</div>
+    </div>
+  </div>
+
+  <!-- 3: factory comparison chart -->
+  <div class="card" style="margin-bottom:16px;">
+    <h3 id="sim-title">Predicted lead time by factory</h3>
+    <div class="sub" id="sim-sub"></div>
+    <div class="chart-box tall"><canvas id="sim-chart"></canvas></div>
+  </div>
+
+  <!-- 4: ranking -->
+  <div class="card" style="margin-bottom:16px;">
+    <h3>Ranked factories <span class="tooltip-ic">i<span class="tt">Lead time is a model-based estimate.</span></span></h3>
+    <div class="sub">Fastest first</div>
+    <div class="leaderboard" id="sim-leaderboard"></div>
+  </div>
+
+  <!-- 5: route map -->
+  <div class="card">
+    <h3 id="route-title">Current route vs. recommended route</h3>
+    <div class="sub" id="route-sub"></div>
+    <svg id="route-svg" viewBox="0 0 860 380" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="route-legend">
+      <span class="li"><span class="swatch dashed" style="border-color:var(--black);"></span>Current route</span>
+      <span class="li"><span class="swatch" style="border-color:var(--gold); border-top-width:4px;"></span>Recommended route</span>
+    </div>
+    <div class="route-cmp">
+      <div class="col">
+        <div class="hd"><span class="rs-dot" style="background:var(--black);"></span>Current</div>
+        <div class="v" id="route-cur-name">—</div>
+        <div class="v" id="route-cur-dist">—</div>
+        <div class="v" id="route-cur-time">—</div>
+        <div class="v" id="route-cur-cost">—</div>
+      </div>
+      <div class="col rec">
+        <div class="hd"><span class="rs-dot" style="background:var(--gold);"></span>Recommended</div>
+        <div class="v" id="route-rec-name">—</div>
+        <div class="v" id="route-rec-dist">—</div>
+        <div class="v" id="route-rec-time">—</div>
+        <div class="v" id="route-rec-cost">—</div>
+      </div>
+      <div class="col save">
+        <div class="hd" id="route-save-hd">Save</div>
+        <div class="v" id="route-save-time">—</div>
+        <div class="v" id="route-save-dist">—</div>
+        <div class="v" id="route-save-cost">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 2: WHAT-IF -->
+<section id="whatif" class="view">
+  <div class="section-head">
+    <div class="eyebrow">Compare</div>
+    <h2>Compare factories before you move the product</h2>
+  </div>
+
+  <div class="cmp-setup">
+    <div>
+      <div class="dec-q">Product</div>
+      <div class="combo" id="wi-product-combo">
+        <input id="wi-product-input" type="text" placeholder="Search products…" autocomplete="off">
+        <div class="menu" id="wi-product-menu"></div>
+      </div>
+    </div>
+    <div>
+      <div class="dec-q">Current factory</div>
+      <div class="cmp-current" id="wi-current">—</div>
+    </div>
+    <div>
+      <div class="dec-q">Compare with</div>
+      <div class="chips" id="wi-factory-chips"></div>
+    </div>
+  </div>
+
+  <div class="cmp-result">
+    <div class="cmp-verdict" id="wi-verdict">—</div>
+    <div class="kpis">
+      <div class="k"><div class="l">Lead time</div><div class="v" id="wi-lt">—</div><div class="d" id="wi-lt-d"></div><div class="x" id="wi-lt-x"></div></div>
+      <div class="k"><div class="l">Shipping cost / order</div><div class="v" id="wi-cost">—</div><div class="x" id="wi-cost-x"></div></div>
+      <div class="k"><div class="l">Orders affected</div><div class="v" id="wi-orders">—</div><div class="x">All regions · Standard Class</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h3 id="wi-title">Lead time by region</h3>
+    <div class="chart-box tall"><canvas id="wi-chart"></canvas></div>
+  </div>
+  <button class="reveal-toggle" data-reveal="wi-detail"><span>Show region-by-region detail</span><span class="chev">▾</span></button>
+  <div class="reveal-body" id="wi-detail">
+    <div class="card"><div class="table-wrap"><table id="wi-table"><thead></thead><tbody></tbody></table></div></div>
+  </div>
+</section>
+
+<!-- TAB 3: RECOMMENDATIONS -->
+<section id="rec" class="view">
+  <div class="section-head">
+    <div class="eyebrow">Recommendations</div>
+    <h2>Top opportunities</h2>
+    <p>The three biggest wins right now.</p>
+  </div>
+
+  <div class="pick-cards" id="pick-cards"></div>
+
+  <button class="reveal-toggle" data-reveal="rec-full"><span>Browse all recommendations &amp; filters</span><span class="chev">▾</span></button>
+  <div class="reveal-body" id="rec-full">
+    <div class="card" style="margin:14px 0;">
+      <div class="sub" style="margin-bottom:8px;">Priority — speed ← → profit</div>
+      <input type="range" id="rec-priority" min="0" max="1" step="0.05" value="0.5" style="width:100%; accent-color:var(--gold); margin-bottom:14px;">
+      <div class="sub" style="margin-bottom:8px;">Region</div>
+      <div class="chips" id="rec-region-chips" style="margin-bottom:14px;"></div>
+      <div class="sub" style="margin-bottom:8px;">Minimum orders affected</div>
+      <input type="range" id="rec-minorders" min="0" max="600" step="10" value="0" style="width:100%; accent-color:var(--gold);">
+      <div style="font-size:12px; color:var(--ink-faint); margin-top:4px;" id="rec-minorders-label">Any volume</div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3>Lead-time reduction by route</h3>
+      <div class="chart-box tall"><canvas id="rec-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>All recommendations</h3>
+      <div class="sub" id="rec-count"></div>
+      <div class="table-wrap"><table id="rec-table"><thead></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 4: RISK -->
+<section id="risk" class="view">
+  <div class="section-head">
+    <div class="eyebrow">Risk &amp; Impact</div>
+    <h2>Check before you act</h2>
+  </div>
+
+  <div class="grid cols-2" style="margin-bottom:18px;">
+    <div class="summary-card warn">
+      <div class="sc-label">⚠️ Profit trade-offs</div>
+      <div class="sc-big"><span id="risk-count1">0</span> <span id="risk-word1">recommendations</span></div>
+      <p>may improve speed but increase estimated cost.</p>
+    </div>
+    <div class="summary-card low">
+      <div class="sc-label">📉 Lower confidence</div>
+      <div class="sc-big"><span id="risk-count2">0</span> <span id="risk-word2">recommendations</span></div>
+      <p>have limited historical data — treat as directional.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h3>Faster, but costs more</h3>
+    <div class="sub">Biggest cost increase first</div>
+    <div class="table-wrap"><table id="risk-table1"><thead></thead><tbody></tbody></table></div>
+  </div>
+  <div class="card" style="margin-bottom:26px;">
+    <h3>Limited historical data</h3>
+    <div class="sub">Few past orders behind these estimates</div>
+    <div class="table-wrap"><table id="risk-table2"><thead></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="links">
+    <button data-goto="sim">Factory Simulator</button><button data-goto="whatif">Compare</button><button data-goto="rec">Recommendations</button>
+    <button data-goto="risk">Risk & Impact Panel</button>
+  </div>
+  <div class="copyright">Nassau Candy Distributor — Factory Reallocation &amp; Shipping Optimization · Lead times and costs are estimates</div>
+</footer>
+
+</div>
+
+
+<script>
+// ---------------------------------------------------------------------
+// Data loading: the backend API first, then a static copy (for hosts
+// without a backend). The dashboard itself is unchanged.
+// ---------------------------------------------------------------------
+async function loadBundle(){
+  const sources = [['api/bundle', 'live'], ['data/dashboard_bundle.json', 'static']];
+  // pages opened straight from disk can't fetch(); go to the script fallback
+  for (const [url, mode] of (location.protocol === 'file:' ? [] : sources)){
+    try {
+      const res = await fetch(url, {cache:'no-cache'});
+      if (res.ok) return {bundle: await res.json(), mode};
+    } catch (e) { /* try the next source */ }
+  }
+  // last resort (page opened straight from disk): load the data as a script
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'data/dashboard_bundle.js';
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  if (window.__DASHBOARD_BUNDLE__) return {bundle: window.__DASHBOARD_BUNDLE__, mode: 'static'};
+  throw new Error('No data source available');
+}
+loadBundle().then(({bundle, mode}) => {
+  const status = document.getElementById('data-status');
+  if (status) status.textContent = mode === 'live' ? 'Live data' : 'Offline data';
+  startApp(bundle);
+  document.body.classList.remove('is-loading');
+}).catch(() => {
+  const status = document.getElementById('data-status');
+  if (status) status.textContent = 'Not connected';
+  document.body.classList.remove('is-loading');
+  document.getElementById('app-error').hidden = false;
+});
+
+function startApp(BUNDLE){
+const SIM = BUNDLE.dashboard_data;
+const REC_ALL = BUNDLE.recommendations;
+const FACTORY_SUMMARY = BUNDLE.factory_summary;
+const MODEL_RESULTS = BUNDLE.model_results;
+const FACTORY_REGION = BUNDLE.factory_region_summary;
+
+const GOLD = '#A9791F', GOOD = '#1B9E8F', BAD = '#D93A2E';
+const FACTORY_COLORS = {
+  "Lot's O' Nuts": '#1F4E8C',
+  "Wicked Choccy's": '#D91C6B',
+  "Sugar Shack": '#E8791F',
+  "Secret Factory": '#1B9E8F',
+  "The Other Factory": '#D93A2E',
+};
+
+// Approximate factory / region coordinates (lat, lon) for the route map.
+// Region coordinates are the mean customer location on record for that region.
+const FACTORY_COORDS = {
+  "Lot's O' Nuts": [32.8819, -111.7680],
+  "Wicked Choccy's": [32.0762, -81.0884],
+  "Sugar Shack": [48.1191, -96.1812],
+  "Secret Factory": [41.4463, -90.5655],
+  "The Other Factory": [35.1175, -89.9711],
+};
+const REGION_COORDS = {
+  "Atlantic": [41.6932, -76.4266],
+  "Gulf": [33.5739, -83.0493],
+  "Interior": [37.0473, -92.9007],
+  "Pacific": [38.6479, -118.3112],
+};
+// Roads/rail rarely run great-circle-straight — this factor approximates how
+// much longer a real driving route tends to run vs. the straight-line
+// distance the lead-time model itself uses. It's an illustrative average,
+// not a routed distance.
+const ROAD_FACTOR = 1.19;
+
+// Model constants (mirroring src/constants.py)
+const SHIP_MODE_BASE_DAYS = { "Same Day": 0.5, "First Class": 1.5, "Second Class": 2.5, "Standard Class": 4.0 };
+const DIVISION_HANDLING_DAYS = { "Chocolate": 0.4, "Sugar": 0.2, "Other": 0.3 };
+const AVG_TRANSIT_SPEED_MPD = 500; // miles per day
+const SHIP_COST_PER_MILE_PER_UNIT = 0.001;
+const MIN_LEAD_TIME_DAYS = 0.3;
+
+// Haversine distance (miles)
+function haversineMiles(lat1, lon1, lat2, lon2){
+  const R = 3958.8;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+// Estimate lead time for a factory→region→product combination
+function estimateLeadTime(factory, region, product, shipMode, division, avgUnits=1){
+  const [flat, flon] = FACTORY_COORDS[factory];
+  const [rlat, rlon] = REGION_COORDS[region];
+  const dist = haversineMiles(flat, flon, rlat, rlon);
+  const base = SHIP_MODE_BASE_DAYS[shipMode] || 4.0;
+  const handling = DIVISION_HANDLING_DAYS[division] || 0.3;
+  const transit = dist / AVG_TRANSIT_SPEED_MPD;
+  return Math.max(MIN_LEAD_TIME_DAYS, base + transit + handling);
+}
+
+// Estimate shipping cost
+function estimateShipCost(factory, region, avgUnits){
+  const [flat, flon] = FACTORY_COORDS[factory];
+  const [rlat, rlon] = REGION_COORDS[region];
+  const dist = haversineMiles(flat, flon, rlat, rlon);
+  return dist * avgUnits * SHIP_COST_PER_MILE_PER_UNIT;
+}
+
+Chart.defaults.color = '#5B5346';
+Chart.defaults.font.family = "'Inter',system-ui,sans-serif";
+Chart.defaults.borderColor = '#E7E1D2';
+
+function uniq(arr){ return [...new Set(arr)].sort(); }
+const PRODUCTS = uniq(SIM.map(r => r.product));
+const REGIONS = uniq(SIM.map(r => r.region));
+const FACTORIES = uniq(SIM.map(r => r.factory));
+const SHIP_MODES = uniq(SIM.map(r => r.ship_mode));
+
+function countUp(el, target, opts={}){
+  const dur = opts.duration || 900, prefix = opts.prefix || '', suffix = opts.suffix || '';
+  const decimals = opts.decimals ?? 0;
+  const start = performance.now();
+  function tick(now){
+    const p = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = target * eased;
+    el.textContent = prefix + val.toLocaleString(undefined, {minimumFractionDigits:decimals, maximumFractionDigits:decimals}) + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ---------------------------------------------------------------------
+// Pill nav with sliding indicator
+// ---------------------------------------------------------------------
+const pillnav = document.getElementById('pillnav');
+const indicator = document.getElementById('pillnav-indicator');
+const NAV_SECTIONS = ['sim','whatif','rec','risk'];
+const navbarEl = document.querySelector('.navbar');
+function moveIndicator(btn){
+  if (!btn) return;
+  indicator.style.left = btn.offsetLeft + 'px';
+  indicator.style.width = btn.offsetWidth + 'px';
+  // keep the active pill visible on narrow screens (horizontal only — never scrolls the page)
+  pillnav.scrollTo({left: btn.offsetLeft - (pillnav.clientWidth - btn.offsetWidth) / 2, behavior:'smooth'});
+}
+function setActiveNav(tab){
+  const btn = pillnav.querySelector(`button[data-tab="${tab}"]`);
+  if (!btn || btn.classList.contains('active')) return;
+  pillnav.querySelectorAll('button[data-tab]').forEach(b => b.classList.toggle('active', b === btn));
+  moveIndicator(btn);
+}
+function navOffset(){ return navbarEl.getBoundingClientRect().height + 14; }
+let navLockTimer = null;
+function goToTab(tab){
+  const target = document.getElementById(tab);
+  if (!target) return;
+  setActiveNav(tab);
+  const top = target.getBoundingClientRect().top + window.scrollY - navOffset();
+  clearTimeout(navLockTimer);
+  navLockTimer = setTimeout(() => { navLockTimer = null; }, 1000);
+  window.scrollTo({top: Math.max(0, top), behavior:'smooth'});
+}
+// highlight the section currently on screen
+function syncNavToScroll(){
+  if (navLockTimer) return;
+  const line = navOffset() + 40;
+  let current = NAV_SECTIONS[0];
+  NAV_SECTIONS.forEach(id => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top <= line) current = id; });
+  setActiveNav(current);
+}
+let navTicking = false;
+window.addEventListener('scroll', () => {
+  if (navTicking) return;
+  navTicking = true;
+  requestAnimationFrame(() => { navTicking = false; syncNavToScroll(); });
+}, {passive:true});
+pillnav.querySelectorAll('button[data-tab]').forEach(btn => btn.addEventListener('click', () => goToTab(btn.dataset.tab)));
+document.querySelectorAll('[data-goto]').forEach(el => el.addEventListener('click', () => goToTab(el.dataset.goto)));
+window.addEventListener('load', () => moveIndicator(pillnav.querySelector('button.active')));
+moveIndicator(pillnav.querySelector('button.active'));
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moveIndicator(pillnav.querySelector('button.active')));
+window.addEventListener('resize', () => moveIndicator(pillnav.querySelector('button.active')));
+
+// ---------------------------------------------------------------------
+// Reveal toggles (progressive disclosure)
+// ---------------------------------------------------------------------
+document.querySelectorAll('.reveal-toggle').forEach(btn => {
+  const body = document.getElementById(btn.dataset.reveal);
+  btn.addEventListener('click', () => {
+    const open = body.classList.toggle('open');
+    btn.classList.toggle('open', open);
+    btn.querySelector('span').textContent = open
+      ? btn.dataset.closeLabel || btn.querySelector('span').textContent.replace('Show','Hide').replace('Browse','Hide')
+      : btn.querySelector('span').textContent;
+  });
+});
+
+// ---------------------------------------------------------------------
+// Chip-group helper: single or multi select, returns {el, get, set, on}
+// ---------------------------------------------------------------------
+function chipGroup(container, options, {multi=false, colorFn=null, initial=null} = {}){
+  let selected = multi ? new Set(initial || options) : (initial ?? options[0]);
+  const listeners = [];
+  function render(){
+    container.innerHTML = options.map(o => {
+      const isActive = multi ? selected.has(o) : selected === o;
+      const bg = colorFn ? colorFn(o) : null;
+      const style = isActive && bg ? `style="background:${bg};border-color:${bg};"` : '';
+      return `<button type="button" class="chip ${isActive?'active':''}" data-val="${o}" ${style}>${o}</button>`;
+    }).join('');
+    [...container.children].forEach(btn => btn.addEventListener('click', () => {
+      const v = btn.dataset.val;
+      if (multi){ selected.has(v) ? selected.delete(v) : selected.add(v); }
+      else { selected = v; }
+      render();
+      listeners.forEach(fn => fn(multi ? [...selected] : selected));
+    }));
+  }
+  render();
+  return {
+    get: () => multi ? [...selected] : selected,
+    on: (fn) => listeners.push(fn),
+  };
+}
+
+// ---------------------------------------------------------------------
+// Searchable combo helper
+// ---------------------------------------------------------------------
+function searchCombo(inputEl, menuEl, options, {colorFn=null, onSelect=null} = {}){
+  let filtered = options;
+  function renderMenu(){
+    menuEl.innerHTML = filtered.slice(0,60).map(o =>
+      `<div class="opt" data-val="${o}">${colorFn ? `<i style="background:${colorFn(o)}"></i>` : ''}${o}</div>`
+    ).join('') || `<div class="opt" style="color:var(--ink-faint);cursor:default;">No matches</div>`;
+    menuEl.querySelectorAll('.opt[data-val]').forEach(opt => {
+      opt.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const v = opt.dataset.val;
+        inputEl.value = v;
+        menuEl.classList.remove('open');
+        if (onSelect) onSelect(v);
+      });
+    });
+  }
+  inputEl.addEventListener('focus', () => { filtered = options; renderMenu(); menuEl.classList.add('open'); });
+  inputEl.addEventListener('input', () => {
+    const q = inputEl.value.toLowerCase();
+    filtered = options.filter(o => o.toLowerCase().includes(q));
+    renderMenu(); menuEl.classList.add('open');
+  });
+  document.addEventListener('click', (e) => { if (!inputEl.contains(e.target) && !menuEl.contains(e.target)) menuEl.classList.remove('open'); });
+  return { setValue: (v) => { inputEl.value = v; } };
+}
+
+// ---------------------------------------------------------------------
+// Quicklook search
+// ---------------------------------------------------------------------
+const qlInput = document.getElementById('quicklook-input');
+document.getElementById('quicklook-list').innerHTML = PRODUCTS.map(p => `<option value="${p}">`).join('');
+function runQuicklook(){
+  const q = qlInput.value.trim().toLowerCase();
+  if (!q) return;
+  const match = PRODUCTS.find(p => p.toLowerCase() === q) || PRODUCTS.find(p => p.toLowerCase().includes(q));
+  if (match){
+    simProductCombo.setValue(match);
+    onSimProductChange(match);
+    goToTab('sim');
+  }
+}
+document.getElementById('quicklook-go').addEventListener('click', runQuicklook);
+qlInput.addEventListener('keydown', e => { if (e.key === 'Enter') runQuicklook(); });
+
+// =======================================================================
+// NETWORK HERO
+// =======================================================================
+const NET_FACTORY_POS = {
+  "Lot's O' Nuts":     {x:150, y:200},
+  "Wicked Choccy's":   {x:660, y:230},
+  "Sugar Shack":       {x:430, y:70},
+  "Secret Factory":    {x:470, y:150},
+  "The Other Factory": {x:560, y:190},
+};
+const NET_REGION_POS = {
+  "Pacific":  {x:60,  y:280},
+  "Interior": {x:330, y:290},
+  "Gulf":     {x:520, y:300},
+  "Atlantic": {x:820, y:270},
+};
+
+function renderNetwork(){
+  const svg = document.getElementById('network-svg');
+  const maxOrders = Math.max(...FACTORY_REGION.map(r => r.orders));
+  let html = '';
+
+  // edges
+  FACTORY_REGION.forEach(r => {
+    const f = NET_FACTORY_POS[r['Current Factory']], g = NET_REGION_POS[r.Region];
+    if (!f || !g) return;
+    const w = 0.8 + (r.orders / maxOrders) * 7;
+    const op = 0.15 + (r.orders / maxOrders) * 0.65;
+    const midX = (f.x + g.x) / 2, midY = Math.min(f.y, g.y) - 30 - (r.orders/maxOrders)*20;
+    html += `<path class="net-edge" data-factory="${r['Current Factory']}" data-region="${r.Region}"
+      d="M ${f.x} ${f.y} Q ${midX} ${midY} ${g.x} ${g.y}"
+      stroke="${FACTORY_COLORS[r['Current Factory']]}" stroke-width="${w}" fill="none" opacity="${op}"
+      stroke-linecap="round"/>`;
+  });
+
+  // region nodes
+  Object.entries(NET_REGION_POS).forEach(([name,p]) => {
+    html += `<g class="net-region" data-region="${name}" style="cursor:pointer;">
+      <circle cx="${p.x}" cy="${p.y}" r="26" fill="#fff" stroke="#D8D2C0" stroke-width="1.5"/>
+      <text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#5B5346" font-family="Inter,sans-serif">${name}</text>
+    </g>`;
+  });
+
+  // factory nodes
+  Object.entries(NET_FACTORY_POS).forEach(([name,p]) => {
+    const color = FACTORY_COLORS[name];
+    html += `<g class="net-factory" data-factory="${name}" style="cursor:pointer;">
+      <circle cx="${p.x}" cy="${p.y}" r="9" fill="${color}"/>
+      <circle cx="${p.x}" cy="${p.y}" r="15" fill="${color}" opacity="0.18"/>
+      <text x="${p.x}" y="${p.y-20}" text-anchor="middle" font-size="11" font-weight="800" fill="#221D14" font-family="'Playfair Display',serif">${name}</text>
+    </g>`;
+  });
+
+  svg.innerHTML = html;
+
+  // hover interactions
+  svg.querySelectorAll('.net-factory').forEach(g => {
+    g.addEventListener('mouseenter', () => {
+      const f = g.dataset.factory;
+      svg.querySelectorAll('.net-edge').forEach(e => {
+        e.style.opacity = e.dataset.factory === f ? 0.9 : 0.05;
+      });
+    });
+    g.addEventListener('mouseleave', () => {
+      svg.querySelectorAll('.net-edge').forEach(e => e.style.opacity = '');
+    });
+    g.addEventListener('click', () => {
+      simProductCombo.setValue(PRODUCTS.find(p => (SIM.find(r=>r.product===p&&r.is_current)||{}).factory === g.dataset.factory) || PRODUCTS[0]);
+      onSimProductChange(document.getElementById('sim-product-input').value);
+      goToTab('sim');
+    });
+  });
+  svg.querySelectorAll('.net-region').forEach(g => {
+    g.addEventListener('mouseenter', () => {
+      const r = g.dataset.region;
+      svg.querySelectorAll('.net-edge').forEach(e => { e.style.opacity = e.dataset.region === r ? 0.9 : 0.05; });
+    });
+    g.addEventListener('mouseleave', () => { svg.querySelectorAll('.net-edge').forEach(e => e.style.opacity = ''); });
+    g.addEventListener('click', () => {
+      simRegionChips.set ? null : null;
+      goToTab('rec');
+    });
+  });
+
+  document.getElementById('net-legend').innerHTML = FACTORIES.map(f =>
+    `<span><i style="background:${FACTORY_COLORS[f]}"></i>${f}</span>`).join('');
+}
+renderNetwork();
+
+// hero stat counters
+(function(){
+  const totalOrders = FACTORY_SUMMARY.reduce((s,f) => s + f.orders, 0);
+  const byRoute = {};
+  REC_ALL.forEach(r => {
+    const key = r['Product Name'] + '|' + r.Region;
+    if (!byRoute[key] || r.lead_time_reduction_pct > byRoute[key].lead_time_reduction_pct) byRoute[key] = r;
+  });
+  const winWin = Object.values(byRoute).filter(r => r.lead_time_reduction_pct > 0 && r.profit_impact_per_order > 0);
+  const totalUplift = winWin.reduce((s,r) => s + r.profit_impact_per_order * r.orders_affected, 0);
+  countUp(document.getElementById('stat-orders'), totalOrders);
+  countUp(document.getElementById('stat-routes'), winWin.length);
+  countUp(document.getElementById('stat-uplift'), totalUplift, {prefix:'$'});
+})();
+
+// =======================================================================
+// TAB 1 — SIMULATOR
+// =======================================================================
+let simProduct = PRODUCTS[0], simRegion = REGIONS[0], simShip = 'Standard Class';
+
+const simProductCombo = searchCombo(
+  document.getElementById('sim-product-input'), document.getElementById('sim-product-menu'), PRODUCTS,
+  { colorFn: p => FACTORY_COLORS[(SIM.find(r=>r.product===p&&r.is_current)||{}).factory] || '#ccc',
+    onSelect: (v) => onSimProductChange(v) }
+);
+simProductCombo.setValue(simProduct);
+
+const simRegionChips = chipGroup(document.getElementById('sim-region-chips'), REGIONS, {initial: simRegion});
+simRegionChips.on(v => { simRegion = v; renderSim(); });
+
+const simShipChips = chipGroup(document.getElementById('sim-ship-chips'), SHIP_MODES, {initial: simShip});
+simShipChips.on(v => { simShip = v; renderSim(); });
+
+function onSimProductChange(v){ simProduct = v; renderSim(); }
+
+let simChart = null;
+function renderSim(){
+  // Get product info (division, current factory) from any SIM row for this product
+  const productInfo = SIM.find(r => r.product === simProduct && r.is_current) || SIM.find(r => r.product === simProduct) || {};
+  const division = productInfo.division || 'Other';
+  const currentFactory = productInfo.factory || FACTORIES[0];
+  // avgUnits not in SIM data; use default for estimated rows (historical rows have pre-computed ship_cost)
+  const avgUnits = 1;
+
+  // Try to get historical rows for this product/region/ship_mode
+  const historicalRows = SIM.filter(r => r.product === simProduct && r.region === simRegion && r.ship_mode === simShip)
+                   .sort((a,b) => a.lead_time - b.lead_time);
+
+  // Build rows for ALL factories (historical + estimated)
+  let rows = [];
+  let hasHistorical = historicalRows.length > 0;
+
+  for (const factory of FACTORIES){
+    const historical = historicalRows.find(r => r.factory === factory);
+    if (historical){
+      rows.push({
+        factory,
+        is_current: historical.is_current,
+        distance: historical.distance,
+        lead_time: historical.lead_time,
+        ship_cost: historical.ship_cost,
+        orders: historical.orders,
+        is_estimated: false
+      });
+    } else {
+      // Compute estimate using model formula
+      const dist = haversineMiles(FACTORY_COORDS[factory][0], FACTORY_COORDS[factory][1], REGION_COORDS[simRegion][0], REGION_COORDS[simRegion][1]);
+      const lt = estimateLeadTime(factory, simRegion, simProduct, simShip, division, avgUnits);
+      const cost = estimateShipCost(factory, simRegion, avgUnits);
+      rows.push({
+        factory,
+        is_current: factory === currentFactory,
+        distance: dist,
+        lead_time: lt,
+        ship_cost: cost,
+        is_estimated: true
+      });
+    }
+  }
+  rows.sort((a,b) => a.lead_time - b.lead_time);
+
+  const current = rows.find(r => r.is_current) || rows[0];
+  const best = rows[0];
+  document.getElementById('sim-title').textContent = 'Predicted lead time by factory';
+  const histCount = hasHistorical ? current.orders || 0 : 0;
+  document.getElementById('sim-sub').textContent =
+    `${simProduct} → ${simRegion} · ${simShip} · ${hasHistorical ? `${histCount} past orders from current factory` : 'estimated'} · outlined bar = current factory`;
+
+  renderDecision(current, best);
+
+  const ctx = document.getElementById('sim-chart').getContext('2d');
+  if (simChart) simChart.destroy();
+  simChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: rows.map(r => r.factory),
+      datasets: [{ label: 'Predicted lead time (days)', data: rows.map(r => r.lead_time),
+        backgroundColor: rows.map(r => FACTORY_COLORS[r.factory]),
+        borderColor: rows.map(r => r.is_current ? '#161311' : 'transparent'),
+        borderWidth: rows.map(r => r.is_current ? 2.5 : 0), borderRadius:6, borderSkipped:false }] },
+    options: { responsive:true, maintainAspectRatio:false, animation:{duration:650, easing:'easeOutQuart'},
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{ label: c => `${c.parsed.y.toFixed(2)} days${rows[c.dataIndex].is_estimated ? ' (est.)' : ''} · ${rows[c.dataIndex].distance.toLocaleString()} mi` } } },
+      scales:{ y:{ title:{display:true, text:'Days'}, grid:{color:'#E7E1D2'} }, x:{ grid:{display:false} } } }
+  });
+
+  const maxLT = Math.max(...rows.map(r=>r.lead_time));
+  document.getElementById('sim-leaderboard').innerHTML = rows.map((r,i) => `
+    <div class="lb-row ${i===0?'best':''} ${r.is_current?'current':''}">
+      <div class="lb-rank ${i===0?'top':''}">${i===0?'🥇':i+1}</div>
+      <div class="lb-dot" style="background:${FACTORY_COLORS[r.factory]}"></div>
+      <div class="lb-name">${r.factory}</div>
+      <div class="lb-bar-wrap"><div class="lb-bar" style="width:${(r.lead_time/maxLT*100).toFixed(0)}%; background:${FACTORY_COLORS[r.factory]}"></div></div>
+      <div class="lb-val">${r.lead_time.toFixed(2)} days</div>
+      <div class="lb-tags">${i===0 ? '<span class="lb-tag best">RECOMMENDED</span>' : ''}${r.is_current ? '<span class="lb-tag">CURRENT</span>' : ''}</div>
+    </div>`).join('');
+
+  renderRouteMap(current, best, simRegion);
+}
+
+// ---- Decision card: the answer first ----
+function renderDecision(current, best){
+  const same = current.factory === best.factory;
+  const saved = current.lead_time - best.lead_time;
+  const pct = current.lead_time ? saved / current.lead_time * 100 : 0;
+  const costDiff = best.ship_cost - current.ship_cost;
+  document.getElementById('dec-dot').style.background = FACTORY_COLORS[best.factory] || GOLD;
+  document.getElementById('dec-factory').textContent = best.factory;
+  document.getElementById('dec-days').innerHTML = `${best.lead_time.toFixed(1)}<small>days</small>`;
+  const delta = document.getElementById('dec-delta');
+  if (same){
+    delta.textContent = '✓ Already the fastest option';
+    delta.className = 'dec-delta same';
+  } else if (saved < 0.05){
+    delta.textContent = `≈ Same speed as today (${saved.toFixed(2)} days faster)`;
+    delta.className = 'dec-delta same';
+  } else {
+    delta.textContent = `↓ ${saved.toFixed(1)} days faster than today`;
+    delta.className = 'dec-delta';
+  }
+  document.getElementById('dec-cost').textContent = fmtCost(best.ship_cost);
+  document.getElementById('dec-context').innerHTML = `${simProduct} <span>→ ${simRegion} · ${simShip}</span>`;
+  document.getElementById('dec-cur-name').textContent = current.factory;
+  document.getElementById('dec-cur-days').textContent = `${current.lead_time.toFixed(1)} days · ${fmtCost(current.ship_cost)}`;
+  document.getElementById('dec-rec-name').textContent = best.factory;
+  document.getElementById('dec-rec-days').textContent = `${best.lead_time.toFixed(1)} days · ${fmtCost(best.ship_cost)}`;
+  const costTxt = Math.abs(costDiff) < 0.005 ? 'no change in shipping cost'
+    : costDiff > 0 ? `shipping cost <b style="color:${BAD}">+${fmtCost(costDiff)}</b> per order`
+    : `shipping cost <b style="color:${GOOD}">−${fmtCost(-costDiff)}</b> per order`;
+  document.getElementById('dec-impact').innerHTML = same
+    ? `<b>Key impact:</b> no faster factory for this route.`
+    : saved < 0.05 ? `<b>Key impact:</b> only ${saved.toFixed(2)} days faster · ${costTxt} — little reason to move.`
+    : `<b>Key impact:</b> <b style="color:${GOOD}">${saved.toFixed(1)} days faster</b> (${pct.toFixed(0)}% quicker) · ${costTxt}`;
+  document.getElementById('dec-action').innerHTML = (same || saved < 0.05)
+    ? `<b>What to do:</b> keep shipping ${simProduct} to ${simRegion} from ${current.factory}.`
+    : `<b>What to do:</b> ship ${simProduct} to ${simRegion} from <b>${best.factory}</b> instead of ${current.factory}.`;
+}
+
+// ---- Route map: current route vs. recommended route ----
+const AVG_GROUND_SPEED_MPD = 500; // assumed miles/day covered once a shipment is moving, for the "real route" time estimate
+function projectLL(lat, lon){
+  const west=-125, east=-66, north=49, south=24.5;
+  const W=860, H=380, padX=36, padY=30;
+  const x = padX + (lon-west)/(east-west) * (W-2*padX);
+  const y = padY + (north-lat)/(north-south) * (H-2*padY);
+  return [x,y];
+}
+function fmtMiles(m){ return `${Math.round(m).toLocaleString()} mi`; }
+function fmtDays(d){ return `${d.toFixed(1)} days`; }
+function fmtCost(c){ return `$${c.toFixed(2)}`; }
+
+function renderRouteMap(curRow, bestRow, region){
+  const svg = document.getElementById('route-svg');
+  const same = curRow.factory === bestRow.factory;
+  const [rlat, rlon] = REGION_COORDS[region] || [39, -98];
+  const [rx, ry] = projectLL(rlat, rlon);
+  const pos = f => projectLL(...(FACTORY_COORDS[f] || [39, -98]));
+  const curve = (fx, fy, side) => {
+    const dx = rx - fx, dy = ry - fy, len = Math.hypot(dx, dy) || 1, bow = Math.min(40, len * 0.14) * side;
+    return `M${fx},${fy} Q${(fx+rx)/2 - (dy/len)*bow},${(fy+ry)/2 + (dx/len)*bow} ${rx},${ry}`;
+  };
+
+  let html = `<rect x="6" y="6" width="848" height="368" rx="10" fill="none" stroke="#E7E1D2" stroke-width="1"/>`;
+  Object.entries(FACTORY_COORDS).forEach(([name, coord]) => {
+    if (name === curRow.factory || name === bestRow.factory) return;
+    const [x,y] = projectLL(coord[0], coord[1]);
+    html += `<circle cx="${x}" cy="${y}" r="4" fill="#D9D2C0"/>`;
+  });
+  const [cx, cy] = pos(curRow.factory), [bx, by] = pos(bestRow.factory);
+  if (!same){
+    html += `<path d="${curve(cx, cy, 1)}" fill="none" stroke="#161311" stroke-width="2.2" stroke-dasharray="7 6" stroke-linecap="round"/>`;
+  }
+  html += `<path d="${curve(bx, by, -1)}" fill="none" stroke="${GOLD}" stroke-width="4" stroke-linecap="round"/>`;
+  // labels go on the side facing away from the route so lines never cross them
+  const node = (x, y, name, tag, tagColor) => {
+    const below = ry < y;               // route heads up → label underneath
+    const y1 = below ? y + 24 : y - 30, y2 = below ? y + 39 : y - 15;
+    return `
+    <circle cx="${x}" cy="${y}" r="8" fill="${FACTORY_COLORS[name] || GOLD}" stroke="#fff" stroke-width="2"/>
+    <text x="${x}" y="${y1}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#221D14" stroke="#FAF7EF" stroke-width="4" paint-order="stroke">${name}</text>
+    <text x="${x}" y="${y2}" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing="1" fill="${tagColor}" stroke="#FAF7EF" stroke-width="4" paint-order="stroke">${tag}</text>`;
+  };
+  if (same){
+    html += node(bx, by, bestRow.factory, 'CURRENT = RECOMMENDED', '#7C5A17');
+  } else {
+    html += node(cx, cy, curRow.factory, 'CURRENT ROUTE', '#161311');
+    html += node(bx, by, bestRow.factory, 'RECOMMENDED ROUTE', '#7C5A17');
+  }
+  html += `<circle cx="${rx}" cy="${ry}" r="8" fill="#161311" stroke="#fff" stroke-width="2"/>`;
+  html += `<text x="${rx}" y="${ry - 14}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#221D14" stroke="#FAF7EF" stroke-width="4" paint-order="stroke">${region} region</text>`;
+  svg.innerHTML = html;
+
+  document.getElementById('route-title').textContent = same
+    ? `${bestRow.factory} → ${region}: already the best route`
+    : `Current route vs. recommended route`;
+  document.getElementById('route-sub').textContent = `${simProduct} → ${region} · ${simShip}`;
+
+  const set = (id, v) => { document.getElementById(id).innerHTML = v; };
+  set('route-cur-name', curRow.factory);
+  set('route-cur-dist', `${fmtMiles(curRow.distance)}`);
+  set('route-cur-time', fmtDays(curRow.lead_time));
+  set('route-cur-cost', `${fmtCost(curRow.ship_cost)} <span>/ order</span>`);
+  set('route-rec-name', bestRow.factory);
+  set('route-rec-dist', `${fmtMiles(bestRow.distance)}`);
+  set('route-rec-time', fmtDays(bestRow.lead_time));
+  set('route-rec-cost', `${fmtCost(bestRow.ship_cost)} <span>/ order</span>`);
+
+  const dDays = curRow.lead_time - bestRow.lead_time;
+  const dMiles = curRow.distance - bestRow.distance;
+  const dCost = curRow.ship_cost - bestRow.ship_cost;
+  set('route-save-hd', same ? 'Save' : 'You save');
+  set('route-save-time', same ? 'No faster route' : `${dDays < 0.05 ? dDays.toFixed(2) : dDays.toFixed(1)} days`);
+  set('route-save-dist', same ? '—' : (dMiles >= 0 ? `${fmtMiles(dMiles)}` : `${fmtMiles(-dMiles)} <span>longer</span>`));
+  set('route-save-cost', same ? '—' : (dCost >= 0 ? `${fmtCost(dCost)} <span>/ order</span>` : `${fmtCost(-dCost)} <span>more / order</span>`));
+}
+
+renderSim();
+
+// =======================================================================
+// TAB 2 — WHAT-IF
+// =======================================================================
+let wiProduct = PRODUCTS[0];
+const firstAlt = FACTORIES.find(f => f !== (SIM.find(r=>r.product===wiProduct&&r.is_current)||{}).factory) || FACTORIES[1];
+let wiFactory = firstAlt;
+
+const wiProductCombo = searchCombo(
+  document.getElementById('wi-product-input'), document.getElementById('wi-product-menu'), PRODUCTS,
+  { colorFn: p => FACTORY_COLORS[(SIM.find(r=>r.product===p&&r.is_current)||{}).factory] || '#ccc',
+    onSelect: (v) => { wiProduct = v; buildWiChips(); renderWhatIf(); } }
+);
+wiProductCombo.setValue(wiProduct);
+
+// "Compare with" lists every factory except the product's current one
+function wiCurrentFactory(){
+  const rows = SIM.filter(r => r.product === wiProduct);
+  return ((rows.find(r => r.is_current) || rows[0]) || {}).factory;
+}
+function buildWiChips(){
+  const cur = wiCurrentFactory();
+  const opts = FACTORIES.filter(f => f !== cur);
+  if (!opts.includes(wiFactory)) wiFactory = opts[0];
+  document.getElementById('wi-current').innerHTML = `<i style="background:${FACTORY_COLORS[cur] || '#ccc'}"></i>${cur || '—'}`;
+  const chips = chipGroup(document.getElementById('wi-factory-chips'), opts,
+    { initial: wiFactory, colorFn: f => FACTORY_COLORS[f] });
+  chips.on(v => { wiFactory = v; renderWhatIf(); });
+}
+buildWiChips();
+
+let wiChart = null;
+function renderWhatIf(){
+  const prodRows = SIM.filter(r => r.product === wiProduct);
+  if (prodRows.length === 0) return;
+  const currentFactory = (prodRows.find(r => r.is_current) || prodRows[0]).factory;
+  document.getElementById('wi-title').textContent = `${currentFactory} vs. ${wiFactory}`;
+
+  const regions = uniq(prodRows.map(r => r.region));
+  const comp = [];
+  regions.forEach(region => {
+    ['Current','Candidate'].forEach(scn => {
+      const factory = scn === 'Current' ? currentFactory : wiFactory;
+      const row = SIM.find(r => r.product===wiProduct && r.region===region && r.factory===factory && r.ship_mode==='Standard Class');
+      if (row) comp.push({region, scn, factory, orders: row.orders, distance: row.distance, lead_time: row.lead_time, ship_cost: row.ship_cost});
+    });
+  });
+
+  const ctx = document.getElementById('wi-chart').getContext('2d');
+  if (wiChart) wiChart.destroy();
+  wiChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels: regions,
+      datasets:[
+        {label:`Current (${currentFactory})`, data: regions.map(r => (comp.find(c=>c.region===r&&c.scn==='Current')||{}).lead_time), backgroundColor: FACTORY_COLORS[currentFactory], borderRadius:6},
+        {label:`Candidate (${wiFactory})`, data: regions.map(r => (comp.find(c=>c.region===r&&c.scn==='Candidate')||{}).lead_time), backgroundColor: FACTORY_COLORS[wiFactory], borderRadius:6},
+      ] },
+    options:{ responsive:true, maintainAspectRatio:false, animation:{duration:650, easing:'easeOutQuart'},
+      plugins:{legend:{position:'top', labels:{boxWidth:12}}},
+      scales:{ y:{title:{display:true,text:'Days'}, grid:{color:'#E7E1D2'}}, x:{grid:{display:false}} } }
+  });
+
+  const tbl = document.getElementById('wi-table');
+  tbl.innerHTML = `<thead><tr><th>Region</th><th>Scenario</th><th>Orders</th><th>Distance (mi)</th><th>Lead time (days)</th><th>Est. shipping cost / order</th></tr></thead>
+  <tbody>${comp.map(c => `<tr><td>${c.region}</td><td>${c.scn}</td><td>${c.orders}</td><td>${c.distance.toLocaleString()}</td><td>${c.lead_time.toFixed(2)}</td><td>$${c.ship_cost.toFixed(2)}</td></tr>`).join('')}</tbody>`;
+
+  const curRows = comp.filter(c => c.scn==='Current'), candRows = comp.filter(c => c.scn==='Candidate');
+  const totalOrders = curRows.reduce((s,c)=>s+c.orders,0);
+  const wavg = (rows,key) => rows.reduce((s,c)=>s+c[key]*c.orders,0) / (rows.reduce((s,c)=>s+c.orders,0)||1);
+  const ltCur = wavg(curRows,'lead_time'), ltCand = wavg(candRows,'lead_time');
+  const costCur = wavg(curRows,'ship_cost'), costCand = wavg(candRows,'ship_cost');
+  const ltDelta = ltCand - ltCur, ltPct = -ltDelta/ltCur*100;
+
+  document.getElementById('wi-lt').textContent = `${ltDelta>=0?'+':''}${ltDelta.toFixed(2)} days`;
+  const d = document.getElementById('wi-lt-d');
+  d.textContent = ltPct>0 ? `${ltPct.toFixed(1)}% faster` : `${Math.abs(ltPct).toFixed(1)}% slower`;
+  d.className = 'd ' + (ltPct>0 ? 'up' : 'down');
+  document.getElementById('wi-cost').textContent = `${costCand-costCur>=0?'+':'−'}$${Math.abs(costCand-costCur).toFixed(3)}`;
+  document.getElementById('wi-orders').textContent = totalOrders.toLocaleString();
+  // current → candidate, in plain words
+  document.getElementById('wi-lt-x').textContent = `${currentFactory} ${ltCur.toFixed(1)}d → ${wiFactory} ${ltCand.toFixed(1)}d`;
+  document.getElementById('wi-cost-x').textContent = `$${costCur.toFixed(2)} → $${costCand.toFixed(2)}`;
+  const costWord = costCand - costCur > 0.0005 ? 'costs a little more to ship' : (costCand - costCur < -0.0005 ? 'is also cheaper to ship' : 'costs about the same to ship');
+  document.getElementById('wi-verdict').innerHTML = ltDelta < 0
+    ? `Moving to ${wiFactory} is <span class="good">${Math.abs(ltDelta).toFixed(1)} days faster</span> and ${costWord}.`
+    : `${wiFactory} would be <span class="bad">${ltDelta.toFixed(1)} days slower</span> — ${currentFactory} is the better choice.`;
+}
+renderWhatIf();
+
+// =======================================================================
+// TAB 3 — RECOMMENDATIONS
+// =======================================================================
+function renderPickCards(){
+  const byRoute = {};
+  REC_ALL.forEach(r => {
+    const key = r['Product Name'] + '|' + r.Region;
+    if (!byRoute[key] || r.composite_score > byRoute[key].composite_score) byRoute[key] = r;
+  });
+  const top3 = Object.values(byRoute).sort((a,b) => b.composite_score - a.composite_score).slice(0,3);
+  document.getElementById('pick-cards').innerHTML = top3.map((r,i) => {
+    const daysFaster = r.current_lead_time_days - r.new_lead_time_days;
+    const impact = r.profit_impact_per_order * r.orders_affected;
+    const impactTxt = `${impact>=0?'+':'−'}$${Math.abs(impact).toLocaleString(undefined,{maximumFractionDigits:0})}`;
+    return `
+    <div class="opp-card">
+      <div class="opp-top"><span>Ships to ${r.Region}</span><span class="rk">#${i+1}</span></div>
+      <div><div class="dec-q">What</div><div class="opp-prod">${r['Product Name']}</div></div>
+      <div class="opp-move">
+        <div><div class="dec-q">Move from</div><b>${r.current_factory}</b></div>
+        <div class="arr">→</div>
+        <div class="to"><div class="dec-q">Move to</div><b>${r.recommended_factory}</b></div>
+      </div>
+      <div class="opp-why">
+        <div class="dec-q">Why</div>
+        <div class="big">${daysFaster.toFixed(1)} days faster</div>
+        <div class="sm">${r.lead_time_reduction_pct.toFixed(0)}% quicker · ${r.orders_affected.toLocaleString()} orders</div>
+        <div class="sm">Estimated impact: <b style="color:${impact>=0?GOOD:BAD}">${impactTxt}</b></div>
+      </div>
+    </div>`;}).join('');
+}
+renderPickCards();
+
+const recRegionChips = chipGroup(document.getElementById('rec-region-chips'), REGIONS, {multi:true, initial: REGIONS});
+recRegionChips.on(() => renderRec());
+const recMinOrdersEl = document.getElementById('rec-minorders');
+const recPriorityEl = document.getElementById('rec-priority');
+recMinOrdersEl.addEventListener('input', () => {
+  document.getElementById('rec-minorders-label').textContent = recMinOrdersEl.value == 0 ? 'Any volume' : `${recMinOrdersEl.value}+ orders`;
+  renderRec();
+});
+recPriorityEl.addEventListener('input', renderRec);
+
+let recChart = null;
+function renderRec(){
+  const regions = recRegionChips.get();
+  const minOrders = Number(recMinOrdersEl.value) || 0;
+  const priority = Number(recPriorityEl.value);
+
+  let rows = REC_ALL.filter(r => regions.includes(r.Region) && r.orders_affected >= minOrders);
+  rows = rows.map(r => ({...r, priority_score:
+    Math.max(r.lead_time_reduction_pct,0)*priority + r.profit_impact_per_order*20*(1-priority)
+  })).sort((a,b) => b.priority_score - a.priority_score);
+
+  document.getElementById('rec-count').textContent = `${rows.length} recommendations match current filters`;
+
+  const top = rows.slice(0,10);
+  const ctx = document.getElementById('rec-chart').getContext('2d');
+  if (recChart) recChart.destroy();
+  recChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels: top.map(r => `${r['Product Name']} (${r.Region})`),
+      datasets:[{ label:'Lead-time reduction %', data: top.map(r=>r.lead_time_reduction_pct),
+        backgroundColor: top.map(r => FACTORY_COLORS[r.recommended_factory] || GOLD), borderRadius:6 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, animation:{duration:650, easing:'easeOutQuart'},
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{afterLabel:c=>`→ ${top[c.dataIndex].recommended_factory} · profit impact/order $${top[c.dataIndex].profit_impact_per_order.toFixed(3)}`}}},
+      scales:{ x:{title:{display:true,text:'%'}, grid:{color:'#E7E1D2'}}, y:{grid:{display:false}, ticks:{autoSkip:false, font:{size:11}}} } }
+  });
+
+  const tbl = document.getElementById('rec-table');
+  tbl.innerHTML = `<thead><tr><th>Product</th><th>Region</th><th>Current</th><th>Recommended</th><th>Orders</th>
+    <th>Current lead time</th><th>New lead time</th><th>Faster by</th><th>Est. profit impact/order</th><th>Confidence</th></tr></thead>
+    <tbody>${rows.slice(0,30).map(r => `<tr>
+      <td>${r['Product Name']}</td><td>${r.Region}</td><td>${r.current_factory}</td><td>${r.recommended_factory}</td>
+      <td>${r.orders_affected}</td><td>${r.current_lead_time_days.toFixed(2)}</td><td>${r.new_lead_time_days.toFixed(2)}</td>
+      <td>${r.lead_time_reduction_pct.toFixed(1)}%</td>
+      <td><span class="pill ${r.profit_impact_per_order>=0?'good':'bad'}">$${r.profit_impact_per_order.toFixed(3)}</span></td>
+      <td>${r.confidence_score.toFixed(2)}</td>
+    </tr>`).join('')}</tbody>`;
+}
+renderRec();
+
+// =======================================================================
+// TAB 4 — RISK
+// =======================================================================
+function renderRisk(){
+  const risky = REC_ALL.filter(r => r.profit_impact_per_order < 0 && r.lead_time_reduction_pct > 0)
+                        .sort((a,b) => a.profit_impact_per_order - b.profit_impact_per_order);
+  const lowConf = REC_ALL.filter(r => r.confidence_score < 0.3).sort((a,b) => a.confidence_score - b.confidence_score);
+
+  countUp(document.getElementById('risk-count1'), risky.length);
+  countUp(document.getElementById('risk-count2'), lowConf.length);
+  document.getElementById('risk-word1').textContent = risky.length === 1 ? 'recommendation' : 'recommendations';
+  document.getElementById('risk-word2').textContent = lowConf.length === 1 ? 'recommendation' : 'recommendations';
+
+  document.getElementById('risk-table1').innerHTML =
+    `<thead><tr><th>Product</th><th>Region</th><th>Current</th><th>Recommended</th><th>Faster by</th><th>Est. profit impact/order</th><th>Orders</th></tr></thead>
+    <tbody>${risky.slice(0,15).map(r=>`<tr><td>${r['Product Name']}</td><td>${r.Region}</td><td>${r.current_factory}</td><td>${r.recommended_factory}</td>
+      <td>${r.lead_time_reduction_pct.toFixed(1)}%</td><td><span class="pill bad">$${r.profit_impact_per_order.toFixed(3)}</span></td><td>${r.orders_affected}</td></tr>`).join('')}</tbody>`;
+
+  document.getElementById('risk-table2').innerHTML =
+    `<thead><tr><th>Product</th><th>Region</th><th>Recommended</th><th>Orders</th><th>Confidence</th></tr></thead>
+    <tbody>${lowConf.slice(0,15).map(r=>`<tr><td>${r['Product Name']}</td><td>${r.Region}</td><td>${r.recommended_factory}</td><td>${r.orders_affected}</td><td>${r.confidence_score.toFixed(2)}</td></tr>`).join('')}</tbody>`;
+}
+renderRisk();
+
+}
+</script>
+</body>
+</html>
