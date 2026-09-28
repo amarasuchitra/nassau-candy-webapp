@@ -14,8 +14,10 @@ opportunities and flags the risky ones.
 - **Backend** — `backend/` (FastAPI): serves the dashboard and a JSON API, with
   live lead-time predictions from the trained model
 - **Pipeline** — `backend/pipeline.py` runs the analysis code in `src/` end to end
-- **Deployment** — Render (one-click Blueprint), Docker, Railway/Heroku (`Procfile`),
-  or any static host for the dashboard alone
+- **Streamlit edition** — `streamlit_app/app.py`: the same dashboard as a Streamlit app,
+  for Streamlit Community Cloud
+- **Deployment** — Streamlit Community Cloud, Render (one-click Blueprint), Docker,
+  Railway/Heroku (`Procfile`), or any static host for the dashboard alone
 
 ---
 
@@ -48,7 +50,7 @@ uvicorn backend.main:app --reload --port 8000
 - Interactive API docs: http://localhost:8000/docs
 
 > Opening `web/index.html` directly (double-click) still works too. It uses a
-> built-in copy of the data (the status bar shows *Offline data* instead of *Live data*).
+> built-in copy of the data (the header shows *Saved data* instead of *Live data*).
 
 ---
 
@@ -80,7 +82,23 @@ curl -X POST http://localhost:8000/api/predict -H "content-type: application/jso
 
 ## Deploy
 
-### Option 1 — Render (recommended, free tier)
+### Option 1 — Streamlit Community Cloud (the project deliverable)
+
+`streamlit_app/app.py` is the Streamlit edition of the dashboard: the same four sections
+(Factory Simulator, Compare, Recommendations, Risk & Impact Panel), design and numbers as the
+web app. It reuses `backend/services.py`, so both always agree.
+
+1. Push this folder to GitHub (it is already at `amarasuchitra/nassau-candy-webapp`).
+2. Go to [share.streamlit.io](https://share.streamlit.io) → **Create app** → *Deploy a public app from GitHub*.
+3. Repository `amarasuchitra/nassau-candy-webapp`, branch **`master`**, main file path **`streamlit_app/app.py`**.
+4. *Advanced settings* → Python **3.11** or **3.12**. No secrets are needed.
+5. **Deploy**. First build takes 2–4 minutes; you get a `*.streamlit.app` link.
+
+Streamlit Cloud installs `streamlit_app/requirements.txt` (next to `app.py`) and reads the theme from
+`.streamlit/config.toml`. Run it locally with `pip install -r streamlit_app/requirements.txt` then
+`streamlit run streamlit_app/app.py`.
+
+### Option 2 — Render (full web app with API, free tier)
 
 1. Put this folder in a GitHub repository (github.com → **New repository** → upload the files,
    or `git init && git add . && git commit -m "init" && git push`).
@@ -95,7 +113,7 @@ first visit afterwards takes ~30–60 seconds to wake up.
 *(Without the Blueprint: New + → Web Service → Build command `pip install -r requirements.txt`,
 Start command `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`, env var `PYTHON_VERSION=3.11.9`.)*
 
-### Option 2 — Docker (any cloud: AWS, Azure, GCP, Fly.io, a VM)
+### Option 3 — Docker (any cloud: AWS, Azure, GCP, Fly.io, a VM)
 
 ```bash
 docker build -t nassau-candy .
@@ -104,11 +122,11 @@ docker run -p 8000:8000 nassau-candy
 
 The container honours `$PORT` and has a built-in health check.
 
-### Option 3 — Railway / Heroku-style hosts
+### Option 4 — Railway / Heroku-style hosts
 
 Connect the repository; the `Procfile` starts the app. Set `PYTHON_VERSION=3.11.9` if asked.
 
-### Option 4 — Dashboard only, no backend (Netlify / Vercel / GitHub Pages)
+### Option 5 — Dashboard only, no backend (Netlify / Vercel / GitHub Pages)
 
 `netlify.toml` and `vercel.json` publish the `web/` folder. The page detects there is no
 API and uses its built-in data (`web/data/`); the numbers are the same.
@@ -165,15 +183,12 @@ web/
 data/                Source orders CSV
 outputs/             Trained model, recommendations, summaries, charts
 tests/               API tests
-streamlit_app/       Earlier Streamlit version (optional; see below)
+streamlit_app/       Streamlit edition of the dashboard (deploy on Streamlit Community Cloud)
+.streamlit/          Streamlit theme
 Dockerfile, render.yaml, Procfile, .python-version    Deployment
 start_dashboard.bat, start.sh                         Local launchers
 research_paper.md, executive_summary.md               Project write-ups
 ```
-
-The earlier Streamlit version still runs on its own if you need it:
-`pip install -r streamlit_app/requirements.txt && streamlit run streamlit_app/app.py`
-(it does not include the new dashboard design).
 
 ---
 

@@ -1,7 +1,7 @@
-pandas>=2.0
-numpy>=1.24
-scikit-learn>=1.3
-matplotlib>=3.7
-joblib>=1.3
-streamlit>=1.30
-plotly>=5.18
+# Streamlit Community Cloud installs this file (it sits next to app.py).
+streamlit==1.64.0
+plotly==7.1.0
+pandas==3.0.2
+numpy==2.4.4
+scikit-learn==1.8.0
+joblib==1.5.3
