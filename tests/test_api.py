@@ -22,7 +22,7 @@ def test_health(client):
 def test_frontend_served(client):
     r = client.get("/")
     assert r.status_code == 200
-    assert "Where should this product ship from?" in r.text
+    assert "Where should we ship this product from?" in r.text
     assert r.headers["x-content-type-options"] == "nosniff"
 
 
