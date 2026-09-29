@@ -34,8 +34,9 @@ def read(*parts):
 
 
 @st.cache_data(show_spinner=False)
-def page():
-    """web/index.html with its data and chart library inlined (the iframe has no file access)."""
+def page(version):
+    """web/index.html with its data and chart library inlined (the iframe has no file access).
+    `version` (the files' modification times) makes the cache refresh whenever the page or data change."""
     html = read("index.html")
     html = html.replace('<script src="data/dashboard_bundle.js"></script>',
                         "<script>" + read("data", "dashboard_bundle.js") + "</script>", 1)
@@ -44,4 +45,6 @@ def page():
     return html
 
 
-components.html(page(), height=900, scrolling=True)
+version = tuple(os.path.getmtime(os.path.join(WEB, *p)) for p in
+                (("index.html",), ("data", "dashboard_bundle.js"), ("vendor", "chart.umd.min.js")))
+components.html(page(version), height=900, scrolling=True)
