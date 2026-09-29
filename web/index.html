@@ -85,6 +85,32 @@ header.masthead{padding:34px 24px 8px; text-align:center;}
 .net-hint{text-align:center; font-size:11.5px; color:var(--ink-faint); padding-bottom:14px;}
 
 
+/* is the move worth it + route groups */
+.card.worth, .card.groups{margin:18px 0;}
+.worth-grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.35fr); gap:22px; margin:14px 0 16px; align-items:start;}
+.assump label{display:flex; justify-content:space-between; gap:10px; font-size:13px; color:var(--ink-dim); margin:10px 0 6px;}
+.assump label b{color:var(--ink); font-variant-numeric:tabular-nums;}
+.assump input[type=range]{width:100%; accent-color:var(--gold); cursor:pointer;}
+.assump-note{font-size:12px; color:var(--ink-faint); margin-top:12px; line-height:1.5;}
+.dec-tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.dec-tile{border:1px solid var(--line); border-radius:10px; padding:12px 14px; border-top-width:4px;}
+.dec-tile .n{font-size:30px; font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums;}
+.dec-tile .l{font-weight:700; font-size:13.5px; margin-top:2px;}
+.dec-tile .d{font-size:12px; color:var(--ink-faint); margin-top:4px; line-height:1.4;}
+.dec-tile.re{border-top-color:#1E7B4E;} .dec-tile.re .n{color:#1E7B4E;}
+.dec-tile.pi{border-top-color:#B7791F;} .dec-tile.pi .n{color:#B7791F;}
+.dec-tile.ke{border-top-color:#8A8373;} .dec-tile.ke .n{color:#6B6454;}
+.worth-head{margin-top:14px; font-size:14px; line-height:1.55; color:var(--ink);}
+.worth-foot{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;}
+.dpill{display:inline-block; font-size:11.5px; font-weight:700; padding:2px 9px; border-radius:999px; white-space:nowrap;}
+.dpill.re{background:rgba(30,123,78,.12); color:#1E7B4E;} .dpill.pi{background:rgba(183,121,31,.14); color:#8C5A14;} .dpill.ke{background:rgba(107,100,84,.12); color:#5A5446;}
+.opp-dec{margin-top:8px; font-size:12.5px; color:var(--ink-dim);}
+.groups-grid{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:20px; margin-top:12px; align-items:start;}
+.cl-item{border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:10px; border-left-width:5px;}
+.cl-item .t{font-weight:700; font-size:13.5px;} .cl-item .m{font-size:12.5px; color:var(--ink-dim); margin-top:3px; line-height:1.45;}
+@media (max-width:860px){ .worth-grid,.groups-grid{grid-template-columns:1fr;} .dec-tiles{grid-template-columns:1fr 1fr 1fr;} }
+@media (max-width:520px){ .dec-tiles{grid-template-columns:1fr;} }
+
 /* shipment simulation */
 .sim-grid{display:grid; grid-template-columns:minmax(0,2.1fr) minmax(0,1fr); gap:18px; margin-top:6px; align-items:start;}
 .sim-map{position:relative;}
@@ -587,6 +613,43 @@ footer.foot .copyright{font-size:11.5px; color:var(--ink-faint); padding-bottom:
   </div>
 
   <div class="pick-cards" id="pick-cards"></div>
+
+  <!-- Is the move worth it? (switching cost + payback) -->
+  <div class="card worth">
+    <h3>Is the move worth it?</h3>
+    <div class="sub">Moving a route to a new factory has a one-time cost (setting up production, moving stock). A move is recommended only if its yearly saving pays that back in time. The dataset has no switching cost, so these are business assumptions: change them to test the decision.</div>
+    <div class="worth-grid">
+      <div class="assump">
+        <label for="sw-cost">One-time switching cost per route <b id="sw-cost-v">$1,500</b></label>
+        <input type="range" id="sw-cost" min="0" max="6000" step="250" value="1500">
+        <label for="sw-limit">Payback must be within <b id="sw-limit-v">12 months</b></label>
+        <input type="range" id="sw-limit" min="3" max="36" step="1" value="12">
+        <label for="sw-min">Minimum orders per year <b id="sw-min-v">20</b></label>
+        <input type="range" id="sw-min" min="0" max="200" step="5" value="20">
+        <div class="assump-note">Yearly saving = estimated saving per order &times; 2025 orders on the route. Payback = switching cost &divide; yearly saving.</div>
+      </div>
+      <div>
+        <div class="dec-tiles">
+          <div class="dec-tile re"><div class="n" id="sw-n-re">0</div><div class="l">Reallocate</div><div class="d">Faster, cheaper, pays back in time, enough data</div></div>
+          <div class="dec-tile pi"><div class="n" id="sw-n-pi">0</div><div class="l">Pilot first</div><div class="d">Worth it, but slow payback or little data</div></div>
+          <div class="dec-tile ke"><div class="n" id="sw-n-ke">0</div><div class="l">Keep current</div><div class="d">Gain too small, too few orders, or costs more</div></div>
+        </div>
+        <div class="worth-head" id="sw-head"></div>
+      </div>
+    </div>
+    <div class="table-wrap"><table id="sw-table"><thead></thead><tbody></tbody></table></div>
+    <div class="worth-foot"><div class="sub" id="sw-more"></div><button type="button" class="sim-btn" id="sw-dl">Download action plan (CSV)</button></div>
+  </div>
+
+  <!-- Route groups (k-means) -->
+  <div class="card groups">
+    <h3>Route groups</h3>
+    <div class="sub">The 53 product-region routes, grouped by k-means clustering on shipping distance, order volume and the best lead-time gain available. Bubble size = orders in 2025. Hover a bubble for the route.</div>
+    <div class="groups-grid">
+      <div class="chart-box tall"><canvas id="cluster-chart"></canvas></div>
+      <div id="cluster-list"></div>
+    </div>
+  </div>
 
   <button class="reveal-toggle" data-reveal="rec-full"><span>Browse all recommendations &amp; filters</span><span class="chev">▾</span></button>
   <div class="reveal-body" id="rec-full">
@@ -1386,6 +1449,159 @@ renderWhatIf();
 // =======================================================================
 // TAB 3 — RECOMMENDATIONS
 // =======================================================================
+
+// =======================================================================
+// Switching cost + payback decision (mirrors analysis/routes.py)
+// =======================================================================
+const SW = { cost:1500, limit:12, minOrders:20 };
+function bestMoveByRoute(){
+  const best = {};
+  REC_ALL.forEach(r => { const k = r['Product Name'] + '|' + r.Region;
+    if (!best[k] || r.composite_score > best[k].composite_score) best[k] = r; });
+  return best;
+}
+function decideMove(r, p){
+  const saving = r.profit_impact_per_order * r.orders_affected;      // $ per year (2025 volume)
+  const faster = r.lead_time_reduction_pct > 0;
+  const payback = saving > 0 ? p.cost / saving * 12 : Infinity;      // months
+  let d;
+  if (!faster || saving <= 0 || r.orders_affected < p.minOrders || payback > 2 * p.limit) d = 'Keep current';
+  else if (payback <= p.limit && r.confidence_score >= 0.3) d = 'Reallocate';
+  else d = 'Pilot first';
+  return { decision:d, saving, payback };
+}
+const DEC_CLASS = { 'Reallocate':'re', 'Pilot first':'pi', 'Keep current':'ke' };
+const fmtUSD = v => `$${Math.round(v).toLocaleString()}`;
+const fmtPay = m => !isFinite(m) ? 'never' : (m < 1 ? '< 1 month' : `${m.toFixed(1)} months`);
+
+// =======================================================================
+// Route groups: k-means on distance, log(orders), best gain (mirrors analysis/routes.py)
+// =======================================================================
+function buildRoutes(){
+  const cur = SIM.filter(r => r.is_current && r.ship_mode === 'Standard Class');
+  const gain = {};
+  REC_ALL.forEach(r => { const k = r['Product Name'] + '|' + r.Region;
+    if (gain[k] === undefined || r.lead_time_reduction_pct > gain[k]) gain[k] = r.lead_time_reduction_pct; });
+  const out = cur.map(r => ({ product:r.product, region:r.region, factory:r.factory, orders:r.orders,
+    distance:r.distance, lead_time:r.lead_time, gain:Math.max(0, gain[r.product + '|' + r.region] || 0) }));
+  out.sort((a,b) => a.product < b.product ? -1 : a.product > b.product ? 1 : (a.region < b.region ? -1 : a.region > b.region ? 1 : 0));
+  return out;
+}
+function kmeansRoutes(R, k){
+  const X = R.map(r => [r.distance, Math.log1p(r.orders), r.gain]);
+  const n = X.length, dim = 3, mu = [0,0,0], sd = [0,0,0];
+  X.forEach(x => x.forEach((v,j) => mu[j] += v / n));
+  X.forEach(x => x.forEach((v,j) => sd[j] += (v - mu[j]) ** 2 / n));
+  for (let j = 0; j < dim; j++) sd[j] = Math.sqrt(sd[j]) || 1;
+  const Z = X.map(x => x.map((v,j) => (v - mu[j]) / sd[j]));
+  const d2 = (a,b) => a.reduce((s,v,j) => s + (v - b[j]) ** 2, 0);
+  let first = 0; Z.forEach((z,i) => { if (z[1] > Z[first][1]) first = i; });
+  let C = [Z[first].slice()];
+  while (C.length < k){
+    let bi = 0, bd = -1;
+    Z.forEach((z,i) => { const d = Math.min(...C.map(c => d2(z,c))); if (d > bd){ bd = d; bi = i; } });
+    C.push(Z[bi].slice());
+  }
+  let lab = new Array(n).fill(-1);
+  for (let it = 0; it < 100; it++){
+    const nl = Z.map(z => { let b = 0, bd = Infinity; C.forEach((c,j) => { const d = d2(z,c); if (d < bd){ bd = d; b = j; } }); return b; });
+    const newC = C.map((c,j) => { const m = Z.filter((_,i) => nl[i] === j); return m.length ? m[0].map((_,t) => m.reduce((s,z) => s + z[t], 0) / m.length) : c; });
+    const moved = newC.some((c,j) => c.some((v,t) => Math.abs(v - C[j][t]) > 1e-8));
+    lab = nl; C = newC;
+    if (!moved) break;
+  }
+  return { lab, C };
+}
+const ROUTES = buildRoutes();
+const KM = kmeansRoutes(ROUTES, 4);
+// name each group from its centre (z-scores: [distance, volume, gain])
+const CLUSTER_INFO = (() => {
+  const ids = [0,1,2,3];
+  const hiGain = ids.reduce((a,b) => KM.C[b][2] > KM.C[a][2] ? b : a);
+  let rest = ids.filter(i => i !== hiGain);
+  const loGain = rest.reduce((a,b) => KM.C[b][2] < KM.C[a][2] ? b : a);
+  rest = rest.filter(i => i !== loGain);
+  const core = rest.reduce((a,b) => KM.C[b][1] > KM.C[a][1] ? b : a);
+  const thin = rest.find(i => i !== core);
+  const info = {};
+  info[hiGain] = { order:1, name:'Long-haul, big gain', color:'#1E7B4E', note:'Shipped far today; a nearer factory cuts lead time the most. Main candidates to move.' };
+  info[core]   = { order:2, name:'Core volume, modest gain', color:'#2A6FB0', note:'Carry most orders; some gain available, so moves must clear the switching cost.' };
+  info[thin]   = { order:3, name:'Low volume, uncertain gain', color:'#B7791F', note:'Few orders, so savings rarely repay a switch and data is thin. Pilot or wait.' };
+  info[loGain] = { order:4, name:'Short, already well served', color:'#8A8373', note:'Already shipped from a nearby factory; little to gain. Keep as is.' };
+  return info;
+})();
+
+function renderWorth(){
+  const best = Object.values(bestMoveByRoute());
+  const rows = best.map(r => ({ r, ...decideMove(r, SW) }));
+  const cnt = { 'Reallocate':0, 'Pilot first':0, 'Keep current':0 };
+  rows.forEach(x => cnt[x.decision]++);
+  document.getElementById('sw-n-re').textContent = cnt['Reallocate'];
+  document.getElementById('sw-n-pi').textContent = cnt['Pilot first'];
+  document.getElementById('sw-n-ke').textContent = cnt['Keep current'];
+  const re = rows.filter(x => x.decision === 'Reallocate');
+  const yearly = re.reduce((s,x) => s + x.saving, 0), net = yearly - SW.cost * re.length;
+  document.getElementById('sw-head').innerHTML = re.length
+    ? `<b>${re.length} of ${rows.length} routes are worth moving</b> after a ${fmtUSD(SW.cost)} switching cost: together they save <b>${fmtUSD(yearly)} a year</b>, or <b>${fmtUSD(net)}</b> in the first year after paying for the switches.`
+    : `<b>No route pays back within ${SW.limit} months</b> at a ${fmtUSD(SW.cost)} switching cost. Lower the cost or allow a longer payback to see candidates.`;
+  const order = { 'Reallocate':0, 'Pilot first':1, 'Keep current':2 };
+  rows.sort((a,b) => order[a.decision] - order[b.decision] || b.saving - a.saving);
+  const shown = rows.filter(x => x.decision !== 'Keep current');
+  const list = shown.length ? shown : rows.slice(0,8);
+  document.getElementById('sw-table').innerHTML = `<thead><tr><th>Decision</th><th>Product</th><th>Region</th><th>Move</th><th>Faster by</th><th>Yearly saving</th><th>Payback</th><th>Confidence</th></tr></thead>
+    <tbody>${list.map(x => `<tr><td><span class="dpill ${DEC_CLASS[x.decision]}">${x.decision}</span></td><td>${x.r['Product Name']}</td><td>${x.r.Region}</td>
+      <td>${x.r.current_factory} &rarr; ${x.r.recommended_factory}</td><td>${x.r.lead_time_reduction_pct.toFixed(1)}%</td>
+      <td>${x.saving > 0 ? fmtUSD(x.saving) : '&minus;' + fmtUSD(-x.saving)}</td><td>${fmtPay(x.payback)}</td><td>${x.r.confidence_score.toFixed(2)}</td></tr>`).join('')}</tbody>`;
+  document.getElementById('sw-more').textContent = shown.length
+    ? `${cnt['Keep current']} other routes: keep the current factory.` : 'No route passes; showing the closest candidates.';
+  renderPickCards();
+  SW.rows = rows;
+}
+function downloadPlan(){
+  const q = v => `"${String(v).replace(/"/g,'""')}"`;
+  const head = ['Decision','Product','Region','Current factory','Recommended factory','Lead time now (days)','Lead time after (days)','Faster by (%)','Orders (2025)','Yearly saving ($)','Payback (months)','Confidence'];
+  const lines = [`# Assumptions: switching cost $${SW.cost} per route; payback within ${SW.limit} months; at least ${SW.minOrders} orders per year`, head.join(',')];
+  SW.rows.forEach(x => lines.push([x.decision, x.r['Product Name'], x.r.Region, x.r.current_factory, x.r.recommended_factory,
+    x.r.current_lead_time_days.toFixed(2), x.r.new_lead_time_days.toFixed(2), x.r.lead_time_reduction_pct.toFixed(1), x.r.orders_affected,
+    x.saving.toFixed(2), isFinite(x.payback) ? x.payback.toFixed(1) : '', x.r.confidence_score.toFixed(2)].map(q).join(',')));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv'}));
+  a.download = 'nassau_candy_action_plan.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+function bindWorth(){
+  document.getElementById('sw-dl').addEventListener('click', downloadPlan);
+  const c = document.getElementById('sw-cost'), l = document.getElementById('sw-limit'), m = document.getElementById('sw-min');
+  const sync = () => { SW.cost = +c.value; SW.limit = +l.value; SW.minOrders = +m.value;
+    document.getElementById('sw-cost-v').textContent = fmtUSD(SW.cost);
+    document.getElementById('sw-limit-v').textContent = `${SW.limit} months`;
+    document.getElementById('sw-min-v').textContent = SW.minOrders;
+    renderWorth(); };
+  [c,l,m].forEach(e => e.addEventListener('input', sync));
+  sync();
+}
+
+let clusterChart = null;
+function renderClusters(){
+  const groups = [0,1,2,3].sort((a,b) => CLUSTER_INFO[a].order - CLUSTER_INFO[b].order);
+  const maxO = Math.max(...ROUTES.map(r => r.orders));
+  const ds = groups.map(g => ({ label: CLUSTER_INFO[g].name, backgroundColor: CLUSTER_INFO[g].color + 'B3', borderColor: CLUSTER_INFO[g].color, borderWidth:1,
+    data: ROUTES.map((r,i) => ({r,i})).filter(o => KM.lab[o.i] === g).map(({r}) => ({ x:r.distance, y:r.gain, r: 4 + 14 * Math.sqrt(r.orders / maxO), route:r })) }));
+  const ctx = document.getElementById('cluster-chart').getContext('2d');
+  if (clusterChart) clusterChart.destroy();
+  clusterChart = new Chart(ctx, { type:'bubble', data:{ datasets: ds },
+    options:{ responsive:true, maintainAspectRatio:false, animation:{duration:600},
+      plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true, boxWidth:8, font:{size:11} } },
+        tooltip:{ callbacks:{ label: c => { const r = c.raw.route; return `${r.product} → ${r.region}: ${Math.round(r.distance).toLocaleString()} mi from ${r.factory}, ${r.orders} orders, best gain ${r.gain.toFixed(1)}%`; } } } },
+      scales:{ x:{ title:{display:true, text:'Current shipping distance (miles)'}, grid:{color:'#EEE9DD'} },
+               y:{ title:{display:true, text:'Best lead-time gain available (%)'}, min:0, grid:{color:'#EEE9DD'} } } } });
+  document.getElementById('cluster-list').innerHTML = groups.map(g => {
+    const m = ROUTES.filter((_,i) => KM.lab[i] === g);
+    const orders = m.reduce((s,r) => s + r.orders, 0), gain = m.reduce((s,r) => s + r.gain, 0) / m.length, dist = m.reduce((s,r) => s + r.distance, 0) / m.length;
+    return `<div class="cl-item" style="border-left-color:${CLUSTER_INFO[g].color}"><div class="t">${CLUSTER_INFO[g].name}</div>
+      <div class="m">${m.length} routes · ${orders.toLocaleString()} orders · avg ${Math.round(dist).toLocaleString()} mi · avg best gain ${gain.toFixed(1)}%</div>
+      <div class="m">${CLUSTER_INFO[g].note}</div></div>`; }).join('');
+}
+
 function renderPickCards(){
   const byRoute = {};
   REC_ALL.forEach(r => {
@@ -1411,10 +1627,12 @@ function renderPickCards(){
         <div class="big">${daysFaster.toFixed(1)} days faster</div>
         <div class="sm">${r.lead_time_reduction_pct.toFixed(0)}% quicker · ${r.orders_affected.toLocaleString()} orders</div>
         <div class="sm">Estimated impact: <b style="color:${impact>=0?GOOD:BAD}">${impactTxt}</b></div>
+        ${(() => { const dm = decideMove(r, SW); return `<div class="opp-dec"><span class="dpill ${DEC_CLASS[dm.decision]}">${dm.decision}</span> &nbsp;pays back in ${fmtPay(dm.payback)}</div>`; })()}
       </div>
     </div>`;}).join('');
 }
-renderPickCards();
+bindWorth();
+renderClusters();
 
 const recRegionChips = chipGroup(document.getElementById('rec-region-chips'), REGIONS, {multi:true, initial: REGIONS});
 recRegionChips.on(() => renderRec());
