@@ -4,8 +4,6 @@ Nassau Candy ships 15 products from 5 factories to 4 regions, and every product 
 
 **Live dashboard:** https://candy-factory-allocation.streamlit.app
 
-**Research paper:** [paper/Amara_Suchitra_Nassau_Candy_IEEE.pdf](paper/Amara_Suchitra_Nassau_Candy_IEEE.pdf)
-
 ## What I did
 
 1. Cleaned 10,194 orders and estimated the shipping distance for each one (haversine distance from factory to the customer's state).
@@ -37,7 +35,6 @@ backend/         pipeline that runs everything and builds the dashboard data
 outputs/         trained model, summary tables, charts, recommendations
 web/             the dashboard (HTML, CSS, JavaScript)
 streamlit_app/   Streamlit entry point that serves the dashboard
-paper/           research paper
 ```
 
 ## Run it
