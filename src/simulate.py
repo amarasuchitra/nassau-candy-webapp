@@ -1,4 +1,4 @@
-"""simulate.py — What-if factory reassignment simulation & recommendation ranking."""
+"""simulate.py - What-if factory reassignment simulation & recommendation ranking."""
 import os
 import json
 import joblib

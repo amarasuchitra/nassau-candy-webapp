@@ -1,7 +1,7 @@
 """Paths and runtime settings for the web application.
 
 Everything is resolved relative to the project root so the app runs the same
-locally, in Docker and on Render/Railway.
+locally and on Streamlit Community Cloud.
 """
 import os
 import sys

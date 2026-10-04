@@ -59,7 +59,7 @@ def run_pipeline(include_eda: bool = True) -> dict:
     bundle = build_bundle(model, df)
     write_bundle(bundle)
 
-    print(f"Done in {time.perf_counter() - started:.1f}s — best model: {best_name}")
+    print(f"Done in {time.perf_counter() - started:.1f}s - best model: {best_name}")
     return {"best_model": best_name, "results": results,
             "recommendations": int(len(rec)), "generated_at": bundle["meta"]["generated_at"]}
 

@@ -1,1 +1,1 @@
-"""Nassau Candy — Factory Reallocation web application (FastAPI backend)."""
+"""Nassau Candy factory reallocation: services, pipeline and dashboard data."""

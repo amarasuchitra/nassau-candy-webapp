@@ -1,6 +1,5 @@
-# Web application + pipeline (tested versions; Python 3.11-3.13)
-fastapi==0.141.1
-uvicorn==0.46.0
+streamlit==1.64.0
+plotly==7.1.0
 pandas==3.0.2
 numpy==2.4.4
 scikit-learn==1.8.0

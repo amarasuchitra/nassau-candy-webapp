@@ -1,4 +1,4 @@
-"""eda.py — Exploratory analysis: bottlenecks, slow routes, profit patterns."""
+"""eda.py - Exploratory analysis: bottlenecks, slow routes, profit patterns."""
 import os
 import matplotlib
 matplotlib.use("Agg")
@@ -64,7 +64,7 @@ def run_eda():
     findings["factory_summary"] = factory_summary.to_dict("records")
 
     # 3b. Factory x Region crosstab (used by the network visualization in the
-    # web dashboard — makes the factory/region mismatch visible at a glance)
+    # web dashboard - makes the factory/region mismatch visible at a glance)
     factory_region = (
         df.groupby(["Current Factory", "Region"])
         .agg(

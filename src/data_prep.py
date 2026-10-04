@@ -1,6 +1,6 @@
 """
 data_prep.py
-Nassau Candy Distributor — Data Preparation & Feature Engineering
+Nassau Candy Distributor - Data Preparation & Feature Engineering
 
 Handles a known data-quality artifact: Ship Date values are 2-4 calendar
 years ahead of Order Date (a synthetic-data generation issue), which makes

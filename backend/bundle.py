@@ -2,13 +2,13 @@
 
 The bundle is the single JSON document the dashboard renders from:
 
-* dashboard_data         — every product x region x factory x ship-mode option,
+* dashboard_data         - every product x region x factory x ship-mode option,
                            with the trained model's predicted lead time
-* recommendations        — outputs/recommendations_ranked.csv
-* factory_summary        — outputs/factory_summary.csv
-* region_summary         — outputs/region_summary.csv
-* factory_region_summary — outputs/factory_region_summary.csv
-* model_results          — outputs/model_results.json
+* recommendations        - outputs/recommendations_ranked.csv
+* factory_summary        - outputs/factory_summary.csv
+* region_summary         - outputs/region_summary.csv
+* factory_region_summary - outputs/factory_region_summary.csv
+* model_results          - outputs/model_results.json
 """
 import json
 import math
@@ -44,7 +44,7 @@ def _records(df: pd.DataFrame):
 
 def build_simulator_grid(df: pd.DataFrame, model) -> list:
     """Predicted lead time / distance / cost for every candidate factory and ship
-    mode, per product x region — the same inputs simulate.py feeds the model."""
+    mode, per product x region - the same inputs simulate.py feeds the model."""
     profiles = build_product_region_profile(df)
     meta, features = [], []
     for _, r in profiles.iterrows():

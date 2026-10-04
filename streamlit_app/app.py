@@ -1,9 +1,8 @@
 """
-Nassau Candy — Factory Allocation (Streamlit edition)
+Nassau Candy factory allocation dashboard (Streamlit).
 
-Streamlit hosts the interactive dashboard in web/index.html full-screen, so the
-deployed app and the FastAPI web app are the same page with the same data
-(web/data/dashboard_bundle.js, built from the model by backend/pipeline.py).
+Streamlit serves the interactive dashboard in web/index.html full-screen.
+The data it shows is web/data/dashboard_bundle.js, built by backend/pipeline.py.
 
 Run locally:   streamlit run streamlit_app/app.py
 Deploy:        Streamlit Community Cloud, main file path streamlit_app/app.py

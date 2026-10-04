@@ -25,7 +25,7 @@ FACTORY_COORDS = {
 FACTORIES = list(FACTORY_COORDS.keys())
 
 # ---------------------------------------------------------------------------
-# Region coordinates (lat, lon) — approximate centroids for route map
+# Region coordinates (lat, lon) - approximate centroids for route map
 # ---------------------------------------------------------------------------
 REGION_COORDS = {
     "Atlantic": [41.6932, -76.4266],

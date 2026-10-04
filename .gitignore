@@ -1,9 +1,6 @@
 __pycache__/
 *.pyc
 .venv/
-.venv-installed
 .DS_Store
-.pytest_cache/
-*.tmp
 outputs/all_models.joblib
 .streamlit/secrets.toml

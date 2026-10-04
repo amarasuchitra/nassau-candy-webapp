@@ -1,7 +1,7 @@
-"""Business logic behind the API.
+"""Business logic behind the dashboard.
 
 Every calculation here mirrors the dashboard's own logic exactly (web/index.html),
-so the API and the page always agree. Nothing here changes the model,
+so every view of the dashboard agrees. Nothing here changes the model,
 the pipeline or the recommendation logic in src/.
 """
 import json
@@ -25,7 +25,7 @@ class NotFound(ValueError):
 
 
 class AppState:
-    """Loads the model + dashboard bundle once and answers API questions."""
+    """Loads the model + dashboard bundle once and answers dashboard questions."""
 
     def __init__(self):
         self._lock = threading.Lock()
@@ -188,7 +188,7 @@ class AppState:
 
     def _order_averages(self, product, region):
         """Average units and order value for this product (and region when it has
-        history) — the same averages the simulation feeds the model."""
+        history) - the same averages the simulation feeds the model."""
         if not hasattr(self, "_avg_cache"):
             try:
                 df = pd.read_csv(os.path.join(config.OUTPUT_DIR, "processed_data.csv"),
